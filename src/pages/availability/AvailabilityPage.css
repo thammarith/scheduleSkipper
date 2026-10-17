@@ -1,0 +1,115 @@
+.page {
+  --top: max(58px, calc(env(safe-area-inset-top) + 4px));
+  max-width: calc(560px + 2 * 16px);
+  margin: 0 auto;
+  padding: var(--top) 16px calc(40px + env(safe-area-inset-bottom));
+}
+
+.nav {
+  position: sticky;
+  top: var(--top);
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  height: 44px;
+}
+
+/* Scroll edge: content fades out under the floating buttons. */
+.nav::before {
+  content: "";
+  position: absolute;
+  inset: calc(-1 * var(--top)) -16px -8px;
+  z-index: -1;
+  background: linear-gradient(var(--bg) 75%, rgb(242 242 247 / 0%));
+  pointer-events: none;
+}
+
+.nav-back,
+.nav-done {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+}
+
+.nav-back {
+  color: var(--label-strong);
+  background: rgb(255 255 255 / 82%);
+  border: 1px solid rgb(255 255 255 / 90%);
+  box-shadow: var(--shadow-glass);
+  backdrop-filter: blur(12px) saturate(180%);
+}
+
+.nav-done {
+  color: #fff;
+  background: var(--blue);
+}
+
+.nav-back:active,
+.nav-done:active {
+  transform: scale(0.94);
+}
+
+.page-header {
+  margin: 8px 4px 0;
+}
+
+.page-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.rest-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px 0;
+}
+
+.rest-note strong {
+  color: var(--tone-fg);
+}
+
+.page-error {
+  padding: 120px 24px;
+  text-align: center;
+}
+
+.toast-region {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(32px + env(safe-area-inset-bottom));
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+  border-radius: 999px;
+  color: #fff;
+  background: rgb(28 28 30 / 92%);
+  box-shadow: var(--shadow-menu);
+  backdrop-filter: blur(20px);
+  animation: toast-in var(--spring-duration) var(--spring);
+}
+
+.toast svg {
+  color: var(--free-solid);
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+}

@@ -1,0 +1,408 @@
+/* ── Sheet header ─────────────────────────────────────────────────────────── */
+.sheet-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.sheet-titles {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sheet-caption {
+  color: var(--tone-fg);
+}
+
+.sheet-close,
+.sheet-save {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.sheet-close {
+  color: var(--label-soft);
+  background: rgb(120 120 128 / 16%);
+}
+
+.sheet-save {
+  color: #fff;
+  background: var(--blue);
+  transition: opacity 200ms ease;
+}
+
+.sheet-save:disabled {
+  opacity: 0.35;
+}
+
+/* 40 pt circles, 44 pt to touch. */
+.sheet-close,
+.sheet-save {
+  position: relative;
+}
+.sheet-close::after,
+.sheet-save::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+}
+
+/* ── Time editor ──────────────────────────────────────────────────────────── */
+.presets {
+  display: flex;
+  gap: 6px;
+  margin: 6px -18px 0;
+  padding: 8px 18px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.presets::-webkit-scrollbar {
+  display: none;
+}
+
+.preset {
+  flex: none;
+  display: flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--label-strong);
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+.preset[aria-pressed="true"] {
+  background: var(--tone-solid);
+  color: #fff;
+}
+
+.pickers {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.picker {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.picker-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 6px;
+  padding: 0 6px;
+}
+
+.picker-label .caption2 {
+  color: var(--tone-fg);
+}
+
+.picker-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 4px 6px;
+  border-radius: 16px;
+  background: var(--card);
+  transition: opacity 200ms ease;
+}
+
+.pickers[data-dimmed="true"] .picker-box {
+  opacity: 0.4;
+}
+
+.picker-band {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  top: calc(4px + 2 * 32px - 1px);
+  height: 34px;
+  border-radius: 9px;
+  background: var(--bg);
+}
+
+.picker-box > .headline {
+  position: relative;
+  color: var(--label-strong);
+}
+
+.sheet-card {
+  margin-top: 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--card);
+}
+
+.sheet-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.sheet-hint {
+  color: var(--red);
+}
+
+.day-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.day-toggle {
+  display: flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--label-soft);
+}
+
+.day-toggle[aria-pressed="true"] {
+  background: var(--tone-bg);
+  color: var(--tone-fg);
+  border: var(--tone-border);
+}
+
+.sheet-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  height: 44px;
+  margin-top: 6px;
+  border-radius: 12px;
+  color: var(--blue);
+}
+
+.sheet-link:disabled {
+  color: var(--label-tertiary);
+}
+
+.sheet-delete {
+  width: 100%;
+  height: 50px;
+  margin-top: 6px;
+  border-radius: 14px;
+  background: var(--card);
+  color: var(--red);
+  text-align: center;
+}
+
+/* ── Day picker ───────────────────────────────────────────────────────────── */
+.calendar {
+  margin-top: 14px;
+  padding: 12px 8px 6px;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  row-gap: 2px;
+}
+
+.calendar-weekday {
+  padding-bottom: 6px;
+  text-align: center;
+  text-decoration: none;
+  color: var(--label-secondary);
+}
+
+.calendar-weekday[data-red="true"] {
+  color: var(--red);
+}
+
+.calendar-day {
+  display: flex;
+  justify-content: center;
+  height: 48px;
+  border-radius: 12px;
+}
+
+.calendar-circle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--cell);
+  color: var(--label-strong);
+  transition: background-color 150ms ease;
+}
+
+.calendar-circle .footnote {
+  line-height: 15px;
+}
+
+.calendar-day[data-red="true"] .calendar-circle {
+  color: var(--red);
+}
+
+.calendar-circle[data-state="mine"] {
+  background: var(--tone-bg);
+  border: var(--tone-border);
+}
+
+.calendar-day .calendar-circle[data-state="mine"] {
+  color: var(--tone-fg);
+}
+
+.calendar-circle[data-state="mine"] .footnote {
+  font-weight: 600;
+}
+
+.calendar-circle[data-state="theirs"] {
+  background: var(--card);
+  border: 1.5px solid var(--tone-bg);
+}
+
+.calendar-mark {
+  display: flex;
+  align-items: center;
+  height: 12px;
+}
+
+.calendar-dot {
+  width: 5px;
+  height: 5px;
+  margin-top: 3px;
+  border-radius: 50%;
+  background: var(--tone-solid);
+}
+
+.calendar-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 10px 6px 0;
+}
+
+.calendar-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.calendar-note-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+/* ── Action sheet ─────────────────────────────────────────────────────────── */
+.action-group {
+  overflow: hidden;
+  border-radius: 20px;
+  background: var(--action-sheet);
+}
+
+.action-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 16px 20px;
+  text-align: center;
+}
+
+.action-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 56px;
+  border-top: 1px solid var(--separator);
+  font: 400 18px/22px var(--font-text);
+  letter-spacing: 0;
+  color: var(--blue);
+}
+
+.action-button:active {
+  background: rgb(0 0 0 / 5%);
+}
+
+.action-button--destructive {
+  color: var(--red);
+}
+
+.action-button--cancel {
+  margin-top: 8px;
+  border: 0;
+  border-radius: 20px;
+  background: var(--card);
+  font-weight: 600;
+}
+
+.action-button:focus-visible {
+  box-shadow: inset var(--focus-ring);
+}
+
+/* ── Day chip menu ────────────────────────────────────────────────────────── */
+.menu {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  min-width: 240px;
+  padding: 0;
+  border: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgb(255 255 255 / 92%);
+  box-shadow: var(--shadow-menu);
+  backdrop-filter: blur(20px) saturate(180%);
+  transform-origin: top left;
+  transition:
+    opacity 150ms ease,
+    transform 250ms var(--spring),
+    display 250ms allow-discrete,
+    overlay 250ms allow-discrete;
+}
+
+.menu:not(:popover-open) {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+@starting-style {
+  .menu:popover-open {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  min-height: 44px;
+  padding: 11px 16px;
+  color: var(--red);
+}
+
+.menu-item:focus-visible {
+  box-shadow: none;
+  background: rgb(0 0 0 / 6%);
+}
