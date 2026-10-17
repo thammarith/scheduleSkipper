@@ -1,0 +1,54 @@
+# Scheduleskipper
+
+Scheduleskipper finds a time that suits a group. This repo holds the first page: **“When are you free?”**, where one person marks when they can make it within a plan’s dates.
+
+## Run it
+
+Needs Node 22+ and pnpm.
+
+```sh
+pnpm install
+pnpm dev          # http://localhost:5173
+```
+
+The page loads with the sample plan (Mook’s Birthday, 19 Oct – 1 Nov 2026) in “free” mode. Add `?seed=busy` to the URL to load the busy-mode sample instead. That sample is only there to check the busy screen against its render. In normal use you switch modes with the segmented control, which flips your times.
+
+Other scripts:
+
+```sh
+pnpm lint         # oxlint, fails on any warning
+pnpm typecheck    # tsc
+pnpm build        # type-check and build to dist/
+```
+
+## Folder layout
+
+```
+src/
+  domain/            Pure TypeScript, no React
+    plan.ts          Plan, dates, holidays, date labels
+    availability.ts  Time ranges, groups, normalise, derive (per 15-minute slot), flip, edits
+    format.ts        Summary lines, range labels ("18:00 – 23:00", "From 20:00", "All day")
+  data/
+    store.ts         AvailabilityStore interface plus an in-memory version (swap for a real API)
+    seed.ts          Sample plan and the two sample availabilities
+  ui/                Shared primitives: Icon, Sheet (<dialog>), SegmentedControl, Wheel
+  pages/availability The page, its cards, sheets and menu
+  styles/global.css  Tokens (colours, type scale, spring easing) and base styles
+```
+
+The domain is the part the group-matching feature will build on. `derive()` gives each plan date 96 slots, each one `free`, `ifNeeded` or `busy`. `normalise()` runs after every edit, and `flip()` switches mode without changing what `derive()` returns.
+
+## Design references
+
+- `design/mark-free.png` and `design/mark-busy.png`: the page in each mode (2× renders of a 393 pt phone)
+- `design/switch-mode-sheet.png`: the confirmation when switching mode with times entered
+- `design/time-editor-sheet.png`: the pattern for the time editor sheet (only the sheet itself)
+- `~/scheduleskipper-design/avail11.html` (frames `g1`, `g2`, `g5`) and `base.css`: the HTML the renders came from, and the exact spec for sizes and colours
+- Figma file `unsaved-mv51j7aj-lojeo2pl`, page “Final”, frames `57:60091` and `57:60239`
+
+## Notes
+
+- The font stack puts the named SF fonts first (`"SF Pro Text"`, then `-apple-system`). The system font adds its own tracking on top of the HIG letter-spacing, which made text a few pixels off the renders. Where SF Pro isn’t installed by name, the system font takes over.
+- The page doesn’t draw a fake status bar, Dynamic Island or home indicator; the device provides those. The layout keeps their space (and respects safe-area insets), so everything else lines up with the renders.
+- From 600 pt wide, the column is centred at 560 pt and sheets show as centred dialogs.
