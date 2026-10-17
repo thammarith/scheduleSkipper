@@ -1,0 +1,108 @@
+.sheet {
+  position: fixed;
+  inset: auto 8px max(8px, env(safe-area-inset-bottom));
+  width: auto;
+  max-width: none;
+  max-height: calc(100dvh - max(8px, env(safe-area-inset-bottom)) - max(48px, env(safe-area-inset-top)));
+  margin: 0;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  overflow: auto;
+  overscroll-behavior: contain;
+  transform: translateY(calc(100% + 16px));
+  transition:
+    transform var(--spring-duration) var(--spring),
+    display var(--spring-duration) allow-discrete,
+    overlay var(--spring-duration) allow-discrete;
+}
+
+.sheet[open] {
+  transform: none;
+}
+
+@starting-style {
+  .sheet[open] {
+    transform: translateY(calc(100% + 16px));
+  }
+}
+
+.sheet::backdrop {
+  background: rgb(0 0 0 / 0%);
+  transition:
+    background-color 300ms ease,
+    display 300ms allow-discrete,
+    overlay 300ms allow-discrete;
+}
+
+.sheet[open]::backdrop {
+  background: rgb(0 0 0 / 28%);
+}
+
+@starting-style {
+  .sheet[open]::backdrop {
+    background: rgb(0 0 0 / 0%);
+  }
+}
+
+.sheet--sheet {
+  background: var(--bg);
+  border-radius: 36px;
+  padding: 8px 18px 24px;
+}
+
+.sheet--action {
+  background: none;
+  overflow: visible;
+}
+
+.sheet-grabber {
+  width: 36px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--wheel-far);
+  margin: 6px auto 0;
+}
+
+/* Wider screens: a centred dialog instead of a bottom sheet. */
+@media (min-width: 600px) {
+  .sheet {
+    inset: 0;
+    width: min(440px, 100% - 32px);
+    height: fit-content;
+    max-height: calc(100dvh - 64px);
+    margin: auto;
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 200ms ease,
+      transform var(--spring-duration) var(--spring),
+      display var(--spring-duration) allow-discrete,
+      overlay var(--spring-duration) allow-discrete;
+  }
+
+  .sheet:not([open]) {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  @starting-style {
+    .sheet[open] {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+  }
+
+  .sheet--sheet {
+    border-radius: 28px;
+    padding-top: 20px;
+  }
+
+  .sheet--action {
+    width: min(360px, 100% - 32px);
+  }
+
+  .sheet-grabber {
+    display: none;
+  }
+}

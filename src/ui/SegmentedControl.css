@@ -1,0 +1,62 @@
+.segmented {
+  position: relative;
+  display: flex;
+  height: 40px;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--track);
+}
+
+.segmented-thumb {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  width: calc((100% - 6px) / var(--count));
+  border-radius: 999px;
+  background: var(--card);
+  box-shadow: var(--shadow-raised);
+  transform: translateX(calc(100% * var(--index)));
+  transition: transform var(--spring-duration) var(--spring);
+}
+
+.segmented-option {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 999px;
+  font: 500 14px/18px var(--font-text);
+  letter-spacing: 0;
+  color: var(--label-muted);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+
+.segmented-option:has(:focus-visible) {
+  box-shadow: var(--focus-ring);
+}
+
+.segmented-option > svg {
+  color: var(--label-secondary);
+}
+
+.segmented-option:has(:checked) {
+  font-weight: 600;
+  color: var(--label-strong);
+}
+
+.segmented-option:has(:checked) > svg {
+  color: var(--tone-fg, currentColor);
+}
+
+/* 34 pt tall visually, 44 pt to touch. */
+.segmented-option::after {
+  content: "";
+  position: absolute;
+  inset: -5px -3px;
+}
