@@ -3,6 +3,8 @@ import './Wheel.css'
 
 /** Row pitch, matching the design's 30 pt rows with 2 pt gaps. */
 const ITEM = 32
+/** The values are drawn three times so the wheel loops; it always settles back in the middle copy. */
+const COPIES = 3
 
 interface WheelProps {
   label: string
@@ -13,35 +15,39 @@ interface WheelProps {
 
 const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-/** An iOS-style picker wheel: scroll-snapped, and a spin button for keyboards and screen readers. */
+/** An iOS-style looping picker wheel: scroll-snapped, and a spin button for keyboards and screen readers. */
 export function Wheel({ label, values, index, onChange }: WheelProps) {
   const ref = useRef<HTMLDivElement>(null)
   const indexRef = useRef(index)
   const settle = useRef(0)
-  const [position, setPosition] = useState(index)
+  const count = values.length
+  const middle = (i: number) => (count + i) * ITEM
+  const [position, setPosition] = useState(count + index)
 
   useEffect(() => {
     indexRef.current = index
     const wheel = ref.current
-    if (wheel && Math.abs(wheel.scrollTop - index * ITEM) > 1) {
-      wheel.scrollTo({ top: index * ITEM, behavior: prefersReducedMotion() ? 'auto' : 'smooth' })
-    }
-  }, [index])
+    if (!wheel) return
+    const current = Math.round(wheel.scrollTop / ITEM)
+    if (current % count === index) return
+    // Take the short way round, from wherever the wheel is now.
+    const forward = (index - (current % count) + count) % count
+    const target = (current + (forward <= count / 2 ? forward : forward - count)) * ITEM
+    wheel.scrollTo({ top: target, behavior: prefersReducedMotion() ? 'auto' : 'smooth' })
+  }, [index, count])
 
   // A wheel inside a closed sheet has no size; jump to the value once it gets one.
   useEffect(() => {
     const wheel = ref.current
     if (!wheel) return
     const observer = new ResizeObserver(() => {
-      wheel.scrollTop = indexRef.current * ITEM
+      wheel.scrollTop = (count + indexRef.current) * ITEM
     })
     observer.observe(wheel)
     return () => observer.disconnect()
-  }, [])
+  }, [count])
 
   useEffect(() => () => window.clearTimeout(settle.current), [])
-
-  const clamp = (i: number) => Math.min(values.length - 1, Math.max(0, i))
 
   const onScroll = () => {
     const wheel = ref.current
@@ -49,16 +55,19 @@ export function Wheel({ label, values, index, onChange }: WheelProps) {
     setPosition(wheel.scrollTop / ITEM)
     window.clearTimeout(settle.current)
     settle.current = window.setTimeout(() => {
-      const settled = clamp(Math.round(wheel.scrollTop / ITEM))
+      const settled = Math.round(wheel.scrollTop / ITEM) % count
+      // Recentre on the middle copy so there is always room to keep turning.
+      if (Math.abs(wheel.scrollTop - middle(settled)) > 1) wheel.scrollTop = middle(settled)
       if (settled !== indexRef.current) onChange(settled)
     }, 120)
   }
 
   const onKeyDown = (event: KeyboardEvent) => {
-    const next = { ArrowUp: index + 1, ArrowDown: index - 1, Home: 0, End: values.length - 1 }[event.key]
+    const step = { ArrowUp: 1, ArrowDown: -1 }[event.key]
+    const next = step !== undefined ? index + step : { Home: 0, End: count - 1 }[event.key]
     if (next === undefined) return
     event.preventDefault()
-    onChange(clamp(next))
+    onChange((next + count) % count)
   }
 
   return (
@@ -78,14 +87,15 @@ export function Wheel({ label, values, index, onChange }: WheelProps) {
       onKeyDown={onKeyDown}
       onClick={(event) => {
         const item = (event.target as HTMLElement).closest<HTMLElement>('[data-index]')
-        if (item) onChange(Number(item.dataset.index))
+        if (item) onChange(Number(item.dataset.index) % count)
       }}
     >
-      {values.map((value, i) => {
+      {Array.from({ length: COPIES * count }, (_, i) => {
+        const value = values[i % count]
         const distance = Math.abs(i - position)
         return (
           <div
-            key={value}
+            key={i}
             className="wheel-item"
             data-index={i}
             data-distance={distance < 0.5 ? 0 : distance < 1.5 ? 1 : 2}
