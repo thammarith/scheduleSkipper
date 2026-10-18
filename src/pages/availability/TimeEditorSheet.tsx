@@ -20,6 +20,9 @@ const PRESETS: Array<{ name: string; range: TimeRange }> = [
   { name: 'Night', range: span(h(22), h(26)) },
 ]
 
+/** A preset's hours in short, "08" rather than "08:00", so the chips stay narrow. */
+const hours = (minutes: number) => clock(minutes).replace(/:00$/, '')
+
 /** What a new time starts as: a plain working day, so no preset is picked yet. */
 const NEW_TIME = { start: h(9), end: h(17) }
 
@@ -111,12 +114,16 @@ export function TimeEditor({
           <button
             key={preset.name}
             type="button"
-            className="preset hit"
+            className="preset"
             aria-pressed={draft !== null && sameRange(preset.range, draft)}
-            aria-label={preset.range.kind === 'allDay' ? undefined : `${preset.name}, ${rangeLabel(preset.range)}`}
             onClick={() => applyPreset(preset.range)}
           >
             <span className="footnote semibold">{preset.name}</span>
+            {preset.range.kind === 'span' && (
+              <span className="preset-range caption2 tabular">
+                {hours(preset.range.start)}–{hours(preset.range.end)}
+              </span>
+            )}
           </button>
         ))}
       </fieldset>

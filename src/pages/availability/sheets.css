@@ -69,16 +69,27 @@
   display: none;
 }
 
+/* Name over its hours ("Morning" over "08:00–12:00"); All day has only its name. */
 .preset {
   flex: none;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  height: 32px;
+  justify-content: center;
+  height: 44px;
   padding: 0 12px;
   border-radius: 999px;
   background: var(--card);
   color: var(--label-strong);
   transition: background-color 200ms ease, color 200ms ease;
+}
+
+.preset-range {
+  color: var(--label-secondary);
+}
+
+.preset[aria-pressed="true"] .preset-range {
+  color: rgb(255 255 255 / 85%);
 }
 
 .preset[aria-pressed="true"] {
