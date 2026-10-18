@@ -229,5 +229,23 @@ export function replaceGroup(
   return normalise({ ...availability, [list]: next ? [...kept, next] : kept }, plan, list)
 }
 
+/**
+ * Dates where saving `next` would take time away from the other list, since the edited list wins any
+ * overlap. Expects normalised availability.
+ */
+export function conflicts(
+  availability: Availability,
+  plan: Plan,
+  list: ListKey,
+  previous: TimeRange | null,
+  next: Group,
+): IsoDate[] {
+  const other = otherList(list)
+  const pieces = (groups: Group[]) => new Set(groups.flatMap((g) => g.dates.map((d) => `${d} ${rangeKey(g.range)}`)))
+  const after = pieces(replaceGroup(availability, plan, list, previous, next)[other])
+  const lost = [...pieces(availability[other])].filter((piece) => !after.has(piece))
+  return [...new Set(lost.map((piece) => piece.slice(0, 10)))].sort()
+}
+
 export const findGroup = (availability: Availability, list: ListKey, range: TimeRange) =>
   availability[list].find((g) => sameRange(g.range, range))

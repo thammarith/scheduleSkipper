@@ -5,6 +5,7 @@ import { ALL_DAY, DAY, sameRange, span, STEP } from '../../utils/availability'
 import { dayLabel, dayLabelLong, planDates } from '../../utils/date'
 import { clock, pluralDays, rangeLabel } from '../../utils/format'
 import { Icon } from '../../ui/Icon'
+import { ConflictWarning } from './ConflictWarning'
 import { SheetHeader } from './SheetHeader'
 import { TONE_NAME } from './tone'
 
@@ -32,6 +33,9 @@ export const TIME_EDITOR_TITLE = 'time-editor-title'
 interface TimeEditorProps {
   plan: Plan
   tone: Tone
+  /** The other list's tone, and the dates a save would take from it. */
+  otherTone: Tone
+  conflictsWith: (range: TimeRange, dates: IsoDate[]) => IsoDate[]
   /** The group being edited, or null for a new time. */
   range: TimeRange | null
   dates: IsoDate[]
@@ -42,7 +46,18 @@ interface TimeEditorProps {
 }
 
 /** The body of the time editor sheet. Mount it afresh for each group so the draft starts clean. */
-export function TimeEditor({ plan, tone, range, dates, onClose, onSave, onSaveAndAddAnother, onDelete }: TimeEditorProps) {
+export function TimeEditor({
+  plan,
+  tone,
+  otherTone,
+  conflictsWith,
+  range,
+  dates,
+  onClose,
+  onSave,
+  onSaveAndAddAnother,
+  onDelete,
+}: TimeEditorProps) {
   const initial = range?.kind === 'span' ? range : NEW_TIME
   const [allDay, setAllDay] = useState(range?.kind === 'allDay')
   // The inputs' own `HH:MM` text, so a half-typed or cleared time stays as the person left it.
@@ -58,6 +73,7 @@ export function TimeEditor({ plan, tone, range, dates, onClose, onSave, onSaveAn
     allDay ? ALL_DAY : from === null || to === null ? null : span(from, endsNextDay ? to + DAY : to)
   const chosen = planDates(plan).filter((d) => picked.has(d))
   const canSave = draft !== null && chosen.length > 0
+  const overlap = canSave ? conflictsWith(draft, chosen) : []
 
   const applyPreset = (preset: TimeRange) => {
     if (preset.kind === 'allDay') return setAllDay(true)
@@ -145,6 +161,8 @@ export function TimeEditor({ plan, tone, range, dates, onClose, onSave, onSaveAn
           ))}
         </ul>
       </fieldset>
+
+      <ConflictWarning tone={tone} otherTone={otherTone} dates={overlap} />
 
       <button
         type="button"

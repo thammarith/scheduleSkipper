@@ -10,6 +10,9 @@ export const LIST_TITLE: Record<Tone, string> = {
   ifNeeded: 'I can be free on these days',
 }
 
+/** How a tone reads inside a sentence: "your free time", "your “can be free” time". */
+export const TONE_PHRASE: Record<Tone, string> = { free: 'free', busy: 'busy', ifNeeded: '“can be free”' }
+
 export const TONE_NAME: Record<Tone, string> = { free: 'Free', busy: 'Busy', ifNeeded: 'Can be free' }
 
 export function rangeIcon(range: TimeRange): IconName {

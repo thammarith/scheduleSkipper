@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Availability, ListKey, Mode, TimeRange } from '../../interfaces/availability'
 import type { IsoDate, Plan } from '../../interfaces/plan'
 import type { AvailabilityStore } from '../../interfaces/store'
-import { clearPrimary, datesOf, findGroup, flip, normalise, otherList, otherMode, replaceGroup } from '../../utils/availability'
+import { clearPrimary, conflicts, datesOf, findGroup, flip, normalise, otherList, otherMode, replaceGroup } from '../../utils/availability'
 import { dayLabel, planRangeLabel } from '../../utils/date'
 import { rangeSpoken, summary } from '../../utils/format'
 import { Icon } from '../../ui/Icon'
@@ -182,6 +182,8 @@ function AvailabilityEditor({ plan, initial, onSave }: AvailabilityEditorProps) 
             key={sheet.id}
             plan={plan}
             tone={toneOf(mode, sheet.list)}
+            otherTone={toneOf(mode, otherList(sheet.list))}
+            conflictsWith={(range, dates) => conflicts(availability, plan, sheet.list, sheet.range, { range, dates })}
             range={sheet.range}
             dates={sheet.dates}
             onClose={closeSheet}
@@ -211,6 +213,7 @@ function AvailabilityEditor({ plan, initial, onSave }: AvailabilityEditorProps) 
             dates={findGroup(availability, sheet.list, sheet.range)?.dates ?? []}
             otherTone={toneOf(mode, otherList(sheet.list))}
             otherDates={datesOf(availability[otherList(sheet.list)])}
+            conflictsWith={(dates) => conflicts(availability, plan, sheet.list, sheet.range, { range: sheet.range, dates })}
             onClose={closeSheet}
             onSave={(dates) => {
               setAvailability((a) => replaceGroup(a, plan, sheet.list, sheet.range, { range: sheet.range, dates }))
