@@ -12,7 +12,7 @@ export const DAY_PICKER_TITLE = 'day-picker-title'
 const WEEKDAY_INITIALS = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
 const WEEKDAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
-const ALREADY: Record<Tone, string> = { free: 'Already free', busy: 'Already busy', maybe: 'Already “can be free”' }
+const ALREADY: Record<Tone, string> = { free: 'Already free', busy: 'Already busy', ifNeeded: 'Already “can be free”' }
 
 interface DayPickerProps {
   plan: Plan

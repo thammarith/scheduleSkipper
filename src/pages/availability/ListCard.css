@@ -89,7 +89,7 @@
   border: var(--tone-border, 0);
 }
 
-.mark-maybe {
+.mark-if-needed {
   font-family: var(--font-rounded);
   font-weight: 700;
   letter-spacing: 0;

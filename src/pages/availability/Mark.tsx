@@ -3,9 +3,9 @@ import type { Tone } from '../../interfaces/availability'
 
 /** The small ✓, ✕ or ? that marks a day as belonging to a list. Takes the tone's colour. */
 export function Mark({ tone, size }: { tone: Tone; size: number }) {
-  if (tone === 'maybe') {
+  if (tone === 'ifNeeded') {
     return (
-      <span className="mark-maybe" style={{ fontSize: size, lineHeight: `${size + 1}px` }} aria-hidden="true">
+      <span className="mark-if-needed" style={{ fontSize: size, lineHeight: `${size + 1}px` }} aria-hidden="true">
         ?
       </span>
     )

@@ -68,7 +68,7 @@ interface AvailabilityEditorProps {
 
 function AvailabilityEditor({ plan, initial, onSave }: AvailabilityEditorProps) {
   const [availability, setAvailability] = useState(initial)
-  const [expanded, setExpanded] = useState<Record<ListKey, boolean>>({ primary: true, maybe: false })
+  const [expanded, setExpanded] = useState<Record<ListKey, boolean>>({ primary: true, ifNeeded: false })
   // The sheet's content outlives `sheetOpen` so it can animate out; `id` remounts it with a fresh draft.
   const [sheet, setSheet] = useState<SheetState & { id: number }>()
   const [sheetOpen, setSheetOpen] = useState(false)
@@ -149,7 +149,7 @@ function AvailabilityEditor({ plan, initial, onSave }: AvailabilityEditorProps) 
           ]}
         />
 
-        {(['primary', 'maybe'] as const).map((list) => {
+        {(['primary', 'ifNeeded'] as const).map((list) => {
           const tone = toneOf(mode, list)
           return (
             <ListCard

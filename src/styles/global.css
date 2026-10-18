@@ -27,11 +27,11 @@
   --busy-bg: #fde8e7;
   --busy-fg: #c4281c;
   --busy-solid: #ff3b30;
-  --maybe-bg: #fff1d6;
-  --maybe-fg: #9a5b00;
-  --maybe-solid: #ff9f0a;
+  --if-needed-bg: #fff1d6;
+  --if-needed-fg: #9a5b00;
+  --if-needed-solid: #ff9f0a;
   /* The "can be free" dashed outline: foreground at ~33% alpha. */
-  --maybe-dash: #9a5b0055;
+  --if-needed-dash: #9a5b0055;
 
   /* Named SF fonts first: the system font adds its own tracking on top of the HIG letter-spacing below. */
   --font-text: "SF Pro Text", -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
@@ -63,11 +63,11 @@
   --tone-solid: var(--busy-solid);
   --tone-border: 0;
 }
-[data-tone="maybe"] {
-  --tone-bg: var(--maybe-bg);
-  --tone-fg: var(--maybe-fg);
-  --tone-solid: var(--maybe-solid);
-  --tone-border: 1.5px dashed var(--maybe-dash);
+[data-tone="ifNeeded"] {
+  --tone-bg: var(--if-needed-bg);
+  --tone-fg: var(--if-needed-fg);
+  --tone-solid: var(--if-needed-solid);
+  --tone-border: 1.5px dashed var(--if-needed-dash);
 }
 
 *,

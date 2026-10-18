@@ -13,7 +13,7 @@ export const ALL_DAY: TimeRange = { kind: 'allDay' }
 export const span = (start: number, end: number): TimeRange => ({ kind: 'span', start, end })
 
 export const otherMode = (mode: Mode): Mode => (mode === 'free' ? 'busy' : 'free')
-export const otherList = (list: ListKey): ListKey => (list === 'primary' ? 'maybe' : 'primary')
+export const otherList = (list: ListKey): ListKey => (list === 'primary' ? 'ifNeeded' : 'primary')
 
 export const rangeKey = (range: TimeRange) => (range.kind === 'allDay' ? 'all-day' : `${range.start}-${range.end}`)
 
@@ -133,21 +133,21 @@ export function normalise(availability: Availability, plan: Plan, winner: ListKe
   const won = toDayMap(availability[winner], dates)
   const lost = subtract(toDayMap(availability[otherList(winner)], dates), toMask(won, dates), dates)
   const lists = { [winner]: toGroups(won, dates), [otherList(winner)]: toGroups(lost, dates) } as Record<ListKey, Group[]>
-  return { mode: availability.mode, primary: lists.primary, maybe: lists.maybe }
+  return { mode: availability.mode, primary: lists.primary, ifNeeded: lists.ifNeeded }
 }
 
 /** What each 15-minute slot of every plan date means for matching. Expects normalised availability. */
 export function derive(availability: Availability, plan: Plan): Map<IsoDate, SlotState[]> {
   const dates = planDates(plan)
   const primary = toMask(toDayMap(availability.primary, dates), dates)
-  const maybe = toMask(toDayMap(availability.maybe, dates), dates)
+  const ifNeeded = toMask(toDayMap(availability.ifNeeded, dates), dates)
   const [marked, rest]: SlotState[] = availability.mode === 'free' ? ['free', 'busy'] : ['busy', 'free']
   return new Map(
     dates.map((date, i) => [
       date,
       Array.from({ length: SLOTS_PER_DAY }, (_, j) => {
         const k = i * SLOTS_PER_DAY + j
-        return primary[k] ? marked : maybe[k] ? 'ifNeeded' : rest
+        return primary[k] ? marked : ifNeeded[k] ? 'ifNeeded' : rest
       }),
     ]),
   )
@@ -192,18 +192,18 @@ function fewestGroups(mask: Uint8Array, dates: IsoDate[]): Group[] {
 
 /**
  * Switches mode while keeping the derived per-slot result the same: primary becomes everything in the
- * plan that was neither primary nor maybe, regrouped into the fewest groups. Maybe stays as is.
+ * plan that was neither primary nor ifNeeded, regrouped into the fewest groups. The ifNeeded list stays as is.
  */
 export function flip(availability: Availability, plan: Plan): Availability {
   const dates = planDates(plan)
   const primary = toMask(toDayMap(availability.primary, dates), dates)
-  const maybe = toMask(toDayMap(availability.maybe, dates), dates)
+  const ifNeeded = toMask(toDayMap(availability.ifNeeded, dates), dates)
   const rest = new Uint8Array(primary.length)
-  for (let k = 0; k < dates.length * SLOTS_PER_DAY; k++) rest[k] = primary[k] || maybe[k] ? 0 : 1
+  for (let k = 0; k < dates.length * SLOTS_PER_DAY; k++) rest[k] = primary[k] || ifNeeded[k] ? 0 : 1
   return normalise(
-    { mode: otherMode(availability.mode), primary: fewestGroups(rest, dates), maybe: availability.maybe },
+    { mode: otherMode(availability.mode), primary: fewestGroups(rest, dates), ifNeeded: availability.ifNeeded },
     plan,
-    'maybe',
+    'ifNeeded',
   )
 }
 

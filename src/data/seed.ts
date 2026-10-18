@@ -20,7 +20,7 @@ export const seedFree: Availability = {
     { range: span(h(18), h(23)), dates: ['2026-10-19', '2026-10-20'] },
     { range: span(h(19.5), h(26)), dates: ['2026-10-30'] },
   ],
-  maybe: [{ range: ALL_DAY, dates: ['2026-10-21', '2026-10-23', '2026-10-27'] }],
+  ifNeeded: [{ range: ALL_DAY, dates: ['2026-10-21', '2026-10-23', '2026-10-27'] }],
 }
 
 /** Matches design/mark-busy.png. Only there to check the busy screen against its render. */
@@ -31,5 +31,5 @@ export const seedBusy: Availability = {
     { range: span(h(9), h(18)), dates: ['2026-10-27', '2026-10-28', '2026-10-29'] },
     { range: span(h(20), h(24)), dates: ['2026-10-21'] },
   ],
-  maybe: [{ range: ALL_DAY, dates: ['2026-10-23'] }],
+  ifNeeded: [{ range: ALL_DAY, dates: ['2026-10-23'] }],
 }
