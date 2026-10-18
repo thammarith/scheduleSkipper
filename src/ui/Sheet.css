@@ -68,7 +68,8 @@
 @media (min-width: 600px) {
   .sheet {
     inset: 0;
-    width: min(440px, 100% - 32px);
+    /* The page column's width, so all five time presets fit on one row. */
+    width: min(560px, 100% - 32px);
     height: fit-content;
     max-height: calc(100dvh - 64px);
     margin: auto;
