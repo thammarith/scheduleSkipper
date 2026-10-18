@@ -150,34 +150,6 @@
   color: var(--red);
 }
 
-.day-toggles {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 10px;
-}
-
-.day-toggle {
-  display: flex;
-  cursor: pointer;
-  align-items: center;
-  height: 28px;
-  padding: 0 10px;
-  border-radius: 999px;
-  background: var(--bg);
-  color: var(--label-soft);
-}
-
-.day-toggle:has(:focus-visible) {
-  box-shadow: var(--focus-ring);
-}
-
-.day-toggle:has(:checked) {
-  background: var(--tone-bg);
-  color: var(--tone-fg);
-  border: var(--tone-border);
-}
-
 .sheet-warning {
   display: flex;
   align-items: flex-start;
@@ -227,6 +199,18 @@
 .calendar {
   margin-top: 14px;
   padding: 12px 8px 6px;
+}
+
+/* The time editor's heading inside the calendar card, in line with the day circles. */
+.calendar-head {
+  /* Floating takes a <legend> off the fieldset's border and into the card. */
+  float: left;
+  width: 100%;
+  padding: 0 6px 10px;
+}
+
+.calendar-head + .calendar-grid {
+  clear: both;
 }
 
 .calendar-grid {

@@ -183,6 +183,7 @@ function AvailabilityEditor({ plan, initial, onSave }: AvailabilityEditorProps) 
             plan={plan}
             tone={toneOf(mode, sheet.list)}
             otherTone={toneOf(mode, otherList(sheet.list))}
+            otherDates={datesOf(availability[otherList(sheet.list)])}
             conflictsWith={(range, dates) => conflicts(availability, plan, sheet.list, sheet.range, { range, dates })}
             range={sheet.range}
             dates={sheet.dates}

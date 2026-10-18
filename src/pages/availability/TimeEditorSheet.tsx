@@ -2,10 +2,11 @@ import { useState } from 'react'
 import type { TimeRange, Tone } from '../../interfaces/availability'
 import type { IsoDate, Plan } from '../../interfaces/plan'
 import { ALL_DAY, DAY, sameRange, span, STEP } from '../../utils/availability'
-import { dayLabel, dayLabelLong, planDates } from '../../utils/date'
+import { planDates } from '../../utils/date'
 import { clock, pluralDays, rangeLabel } from '../../utils/format'
 import { Icon } from '../../ui/Icon'
 import { ConflictWarning } from './ConflictWarning'
+import { CalendarNotes, DayCalendar } from './DayCalendar'
 import { SheetHeader } from './SheetHeader'
 import { TONE_NAME } from './tone'
 
@@ -33,8 +34,9 @@ export const TIME_EDITOR_TITLE = 'time-editor-title'
 interface TimeEditorProps {
   plan: Plan
   tone: Tone
-  /** The other list's tone, and the dates a save would take from it. */
+  /** The other list's tone, its dates, and the dates a save would take from it. */
   otherTone: Tone
+  otherDates: IsoDate[]
   conflictsWith: (range: TimeRange, dates: IsoDate[]) => IsoDate[]
   /** The group being edited, or null for a new time. */
   range: TimeRange | null
@@ -50,6 +52,7 @@ export function TimeEditor({
   plan,
   tone,
   otherTone,
+  otherDates,
   conflictsWith,
   range,
   dates,
@@ -64,6 +67,7 @@ export function TimeEditor({
   const [fromText, setFromText] = useState(clock(initial.start))
   const [toText, setToText] = useState(clock(initial.end))
   const [picked, setPicked] = useState(() => new Set(dates))
+  const other = new Set(otherDates)
 
   const from = toMinutes(fromText)
   const to = toMinutes(toText)
@@ -137,32 +141,26 @@ export function TimeEditor({
         />
       </div>
 
-      <fieldset className="sheet-card">
-        <div className="sheet-card-head">
-          <legend className="footnote">On these days</legend>
-          <span className={`caption1 ${chosen.length > 0 ? 'secondary' : 'sheet-hint'}`}>
-            {chosen.length > 0 ? pluralDays(chosen.length) : 'Pick at least one day'}
-          </span>
-        </div>
-        <ul className="day-toggles">
-          {planDates(plan).map((date) => (
-            <li key={date}>
-              <label className="day-toggle hit">
-                <input
-                  type="checkbox"
-                  className="visually-hidden"
-                  checked={picked.has(date)}
-                  aria-label={dayLabelLong(date)}
-                  onChange={() => toggle(date)}
-                />
-                <span className="caption1 semibold">{dayLabel(date)}</span>
-              </label>
-            </li>
-          ))}
-        </ul>
-      </fieldset>
+      <DayCalendar
+        plan={plan}
+        tone={tone}
+        picked={picked}
+        onToggle={toggle}
+        otherTone={otherTone}
+        otherDates={other}
+        head={
+          <legend className="sheet-card-head calendar-head">
+            <span className="footnote">On these days</span>
+            <span className={`caption1 ${chosen.length > 0 ? 'secondary' : 'sheet-hint'}`}>
+              {chosen.length > 0 ? pluralDays(chosen.length) : 'Pick at least one day'}
+            </span>
+          </legend>
+        }
+      />
 
       <ConflictWarning tone={tone} otherTone={otherTone} dates={overlap} />
+
+      <CalendarNotes plan={plan} picked={picked} otherTone={otherTone} otherDates={other} />
 
       <button
         type="button"
