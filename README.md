@@ -25,12 +25,17 @@ pnpm build        # type-check and build to dist/
 
 ```
 src/
-  domain/            Pure TypeScript, no React
-    plan.ts          Plan, dates, holidays, date labels
-    availability.ts  Time ranges, groups, normalise, derive (per 15-minute slot), flip, edits
+  interfaces/        Types only, no code
+    plan.ts          Plan, holidays, dates
+    availability.ts  Time ranges, groups, availability, modes, tones
+    store.ts         AvailabilityStore (where plans and availability come from)
+  services/
+    memoryStore.ts   In-memory AvailabilityStore (swap for a real API)
+  utils/             Pure TypeScript, no React
+    date.ts          Plan dates, weekdays, holidays, date labels
+    availability.ts  normalise, derive (per 15-minute slot), flip, edits
     format.ts        Summary lines, range labels ("18:00 – 23:00", "From 20:00", "All day")
   data/
-    store.ts         AvailabilityStore interface plus an in-memory version (swap for a real API)
     seed.ts          Sample plan and the two sample availabilities
   ui/                Shared primitives: Icon, Sheet (<dialog>), SegmentedControl, Wheel
   pages/availability The page, its cards, sheets and menu

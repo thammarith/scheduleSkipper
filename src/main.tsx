@@ -1,7 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { createMemoryStore } from './data/store'
 import { seedBusy, seedFree, seedPlan } from './data/seed'
+import { createMemoryStore } from './services/memoryStore'
 import { AvailabilityPage } from './pages/availability/AvailabilityPage'
 import './styles/global.css'
 

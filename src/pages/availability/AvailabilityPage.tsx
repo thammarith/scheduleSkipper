@@ -1,21 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { AvailabilityStore } from '../../data/store'
-import {
-  clearPrimary,
-  datesOf,
-  findGroup,
-  flip,
-  normalise,
-  otherList,
-  otherMode,
-  replaceGroup,
-  type Availability,
-  type ListKey,
-  type Mode,
-  type TimeRange,
-} from '../../domain/availability'
-import { rangeSpoken, summary } from '../../domain/format'
-import { dayLabel, planRangeLabel, type IsoDate, type Plan } from '../../domain/plan'
+import type { Availability, ListKey, Mode, TimeRange } from '../../interfaces/availability'
+import type { IsoDate, Plan } from '../../interfaces/plan'
+import type { AvailabilityStore } from '../../interfaces/store'
+import { clearPrimary, datesOf, findGroup, flip, normalise, otherList, otherMode, replaceGroup } from '../../utils/availability'
+import { dayLabel, planRangeLabel } from '../../utils/date'
+import { rangeSpoken, summary } from '../../utils/format'
 import { Icon } from '../../ui/Icon'
 import { SegmentedControl } from '../../ui/SegmentedControl'
 import { Sheet } from '../../ui/Sheet'

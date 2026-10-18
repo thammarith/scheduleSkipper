@@ -1,5 +1,5 @@
 import { Icon } from '../../ui/Icon'
-import type { Tone } from './tone'
+import type { Tone } from '../../interfaces/availability'
 
 interface SheetHeaderProps {
   id: string

@@ -1,13 +1,8 @@
-import type { Availability } from '../domain/availability'
-import type { Plan } from '../domain/plan'
+import type { Availability } from '../interfaces/availability'
+import type { Plan } from '../interfaces/plan'
+import type { AvailabilityStore } from '../interfaces/store'
 
-/** Where plans and a person's availability come from. A real API replaces the in-memory version. */
-export interface AvailabilityStore {
-  getPlan(planId: string): Promise<Plan>
-  getAvailability(planId: string): Promise<Availability>
-  saveAvailability(planId: string, availability: Availability): Promise<void>
-}
-
+/** An in-memory `AvailabilityStore`, seeded with one plan. */
 export function createMemoryStore(plan: Plan, availability: Availability): AvailabilityStore {
   const plans = new Map([[plan.id, structuredClone(plan)]])
   const availabilities = new Map([[plan.id, structuredClone(availability)]])

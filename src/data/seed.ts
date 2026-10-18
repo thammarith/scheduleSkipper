@@ -1,5 +1,6 @@
-import { ALL_DAY, span, type Availability } from '../domain/availability'
-import type { Plan } from '../domain/plan'
+import type { Availability } from '../interfaces/availability'
+import type { Plan } from '../interfaces/plan'
+import { ALL_DAY, span } from '../utils/availability'
 
 const h = (hours: number) => hours * 60
 

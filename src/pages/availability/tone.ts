@@ -1,8 +1,6 @@
-import { DAY, type ListKey, type Mode, type TimeRange } from '../../domain/availability'
+import type { ListKey, Mode, TimeRange, Tone } from '../../interfaces/availability'
+import { DAY } from '../../utils/availability'
 import type { IconName } from '../../ui/Icon'
-
-/** Each list's colour: the primary list takes the mode's tone, the "can be free" list is always amber. */
-export type Tone = 'free' | 'busy' | 'maybe'
 
 export const toneOf = (mode: Mode, list: ListKey): Tone => (list === 'maybe' ? 'maybe' : mode)
 

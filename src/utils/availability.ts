@@ -1,4 +1,6 @@
-import { planDates, type IsoDate, type Plan } from './plan'
+import type { Availability, Group, ListKey, Mode, SlotState, TimeRange } from '../interfaces/availability'
+import type { IsoDate, Plan } from '../interfaces/plan'
+import { planDates } from './date'
 
 /** Minutes in a day, a time step and the latest a range may end ("ends next day" at 24:00 the day after). */
 export const DAY = 1440
@@ -6,33 +8,9 @@ export const STEP = 15
 export const MAX_END = 2 * DAY
 export const SLOTS_PER_DAY = DAY / STEP
 
-/**
- * A time of day. A span is minutes from midnight in 15-minute steps; `end` past 24:00 means it ends
- * the next day. All day is its own kind rather than 00:00–24:00.
- */
-export type TimeRange = { kind: 'allDay' } | { kind: 'span'; start: number; end: number }
-
 export const ALL_DAY: TimeRange = { kind: 'allDay' }
 
 export const span = (start: number, end: number): TimeRange => ({ kind: 'span', start, end })
-
-export type Mode = 'free' | 'busy'
-
-/** `primary` is what the mode says (free or busy times); `maybe` is "I can be free on these days". */
-export type ListKey = 'primary' | 'maybe'
-
-export interface Group {
-  range: TimeRange
-  dates: IsoDate[]
-}
-
-export interface Availability {
-  mode: Mode
-  primary: Group[]
-  maybe: Group[]
-}
-
-export type SlotState = 'free' | 'ifNeeded' | 'busy'
 
 export const otherMode = (mode: Mode): Mode => (mode === 'free' ? 'busy' : 'free')
 export const otherList = (list: ListKey): ListKey => (list === 'primary' ? 'maybe' : 'primary')

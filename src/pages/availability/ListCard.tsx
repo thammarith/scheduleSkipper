@@ -1,10 +1,12 @@
 import { useId } from 'react'
-import { rangeKey, type Group, type TimeRange } from '../../domain/availability'
-import { endsNextDay, rangeLabel, rangeSpoken } from '../../domain/format'
-import { dayLabel, dayLabelLong, type IsoDate } from '../../domain/plan'
+import type { Group, TimeRange, Tone } from '../../interfaces/availability'
+import type { IsoDate } from '../../interfaces/plan'
+import { rangeKey } from '../../utils/availability'
+import { dayLabel, dayLabelLong } from '../../utils/date'
+import { endsNextDay, rangeLabel, rangeSpoken } from '../../utils/format'
 import { Icon } from '../../ui/Icon'
 import { Badge, Mark } from './Mark'
-import { rangeIcon, type Tone } from './tone'
+import { rangeIcon } from './tone'
 import './ListCard.css'
 
 export interface GroupActions {

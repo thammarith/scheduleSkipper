@@ -1,4 +1,4 @@
-import type { Mode } from '../../domain/availability'
+import type { Mode } from '../../interfaces/availability'
 
 export const SWITCH_TITLE = 'switch-mode-title'
 

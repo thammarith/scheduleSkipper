@@ -1,5 +1,5 @@
 import { Icon } from '../../ui/Icon'
-import type { Tone } from './tone'
+import type { Tone } from '../../interfaces/availability'
 
 /** The small ✓, ✕ or ? that marks a day as belonging to a list. Takes the tone's colour. */
 export function Mark({ tone, size }: { tone: Tone; size: number }) {
