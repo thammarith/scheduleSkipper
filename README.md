@@ -37,12 +37,12 @@ src/
     format.ts        Summary lines, range labels ("18:00 – 23:00", "From 20:00", "All day")
   data/
     seed.ts          Sample plan and the two sample availabilities
-  ui/                Shared primitives: Icon, Sheet (<dialog>), SegmentedControl, Wheel
+  ui/                Shared primitives: Icon, Sheet (<dialog>), SegmentedControl
   pages/availability The page, its cards, sheets and menu
   styles/global.css  Tokens (colours, type scale, spring easing) and base styles
 ```
 
-The domain is the part the group-matching feature will build on. `derive()` gives each plan date 96 slots, each one `free`, `ifNeeded` or `busy`. `normalise()` runs after every edit, and `flip()` switches mode without changing what `derive()` returns.
+`utils/availability.ts` is the part the group-matching feature will build on. `derive()` gives each plan date 96 slots, each one `free`, `ifNeeded` or `busy`. `normalise()` runs after every edit, and `flip()` switches mode without changing what `derive()` returns.
 
 ## Design references
 
@@ -57,3 +57,4 @@ The domain is the part the group-matching feature will build on. `derive()` give
 - The font stack puts the named SF fonts first (`"SF Pro Text"`, then `-apple-system`). The system font adds its own tracking on top of the HIG letter-spacing, which made text a few pixels off the renders. Where SF Pro isn’t installed by name, the system font takes over.
 - The page doesn’t draw a fake status bar, Dynamic Island or home indicator; the device provides those. The layout keeps their space (and respects safe-area insets), so everything else lines up with the renders.
 - From 600 pt wide, the column is centred at 560 pt and sheets show as centred dialogs.
+- Times use the browser's own `<input type="time">` (15-minute step; typed minutes snap down when the field loses focus), so phones show their native time picker. Days are native checkboxes styled as chips and calendar cells, since a date input picks only one date.

@@ -105,36 +105,31 @@
   justify-content: space-between;
   align-items: baseline;
   gap: 6px;
-  padding: 0 6px;
+  padding: 0 14px;
 }
 
-.picker-box {
-  position: relative;
-  display: flex;
-  align-items: center;
-  padding: 4px 6px;
+.time-input {
+  width: 100%;
+  height: 52px;
+  padding: 0 14px;
+  border: 0;
   border-radius: 16px;
   background: var(--card);
+  color: var(--label-strong);
+  font: 400 22px/28px var(--font-display);
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
   transition: opacity 200ms ease;
 }
 
-.pickers[data-dimmed="true"] .picker-box {
+/* Desktop Chrome's clock button, in the secondary label colour. */
+.time-input::-webkit-calendar-picker-indicator {
+  opacity: 0.45;
+  cursor: pointer;
+}
+
+.pickers[data-dimmed="true"] .time-input {
   opacity: 0.4;
-}
-
-.picker-band {
-  position: absolute;
-  left: 6px;
-  right: 6px;
-  top: calc(4px + 2 * 32px - 1px);
-  height: 34px;
-  border-radius: 9px;
-  background: var(--bg);
-}
-
-.picker-box > .headline {
-  position: relative;
-  color: var(--label-strong);
 }
 
 .sheet-card {
@@ -164,6 +159,7 @@
 
 .day-toggle {
   display: flex;
+  cursor: pointer;
   align-items: center;
   height: 28px;
   padding: 0 10px;
@@ -172,7 +168,11 @@
   color: var(--label-soft);
 }
 
-.day-toggle[aria-pressed="true"] {
+.day-toggle:has(:focus-visible) {
+  box-shadow: var(--focus-ring);
+}
+
+.day-toggle:has(:checked) {
   background: var(--tone-bg);
   color: var(--tone-fg);
   border: var(--tone-border);
@@ -228,10 +228,16 @@
 }
 
 .calendar-day {
+  position: relative;
   display: flex;
+  cursor: pointer;
   justify-content: center;
   height: 48px;
   border-radius: 12px;
+}
+
+.calendar-day:has(:focus-visible) {
+  box-shadow: var(--focus-ring);
 }
 
 .calendar-circle {

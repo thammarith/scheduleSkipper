@@ -67,17 +67,16 @@ export function DayPicker({ plan, tone, range, dates, otherTone, otherDates, onC
             const theirs = !selected && other.has(date)
             const holiday = holidayOn(plan, date)
             return (
-              <button
-                key={date}
-                type="button"
-                className="calendar-day"
-                data-red={isWeekend(date) || Boolean(holiday)}
-                aria-pressed={selected}
-                aria-label={[dayLabelLong(date), holiday?.name, theirs && ALREADY[otherTone].toLowerCase()]
-                  .filter(Boolean)
-                  .join(', ')}
-                onClick={() => toggle(date)}
-              >
+              <label key={date} className="calendar-day" data-red={isWeekend(date) || Boolean(holiday)}>
+                <input
+                  type="checkbox"
+                  className="visually-hidden"
+                  checked={selected}
+                  aria-label={[dayLabelLong(date), holiday?.name, theirs && ALREADY[otherTone].toLowerCase()]
+                    .filter(Boolean)
+                    .join(', ')}
+                  onChange={() => toggle(date)}
+                />
                 <span className="calendar-circle" data-state={selected ? 'mine' : theirs ? 'theirs' : 'none'} data-tone={theirs ? otherTone : tone}>
                   <span className="footnote">{Number(date.slice(8))}</span>
                   {selected && (
@@ -87,7 +86,7 @@ export function DayPicker({ plan, tone, range, dates, otherTone, otherDates, onC
                   )}
                   {theirs && <span className="calendar-dot" />}
                 </span>
-              </button>
+              </label>
             )
           })}
         </div>

@@ -3,9 +3,8 @@ import type { TimeRange, Tone } from '../../interfaces/availability'
 import type { IsoDate, Plan } from '../../interfaces/plan'
 import { ALL_DAY, DAY, sameRange, span, STEP } from '../../utils/availability'
 import { dayLabel, dayLabelLong, planDates } from '../../utils/date'
-import { pluralDays, rangeLabel } from '../../utils/format'
+import { clock, pluralDays, rangeLabel } from '../../utils/format'
 import { Icon } from '../../ui/Icon'
-import { Wheel } from '../../ui/Wheel'
 import { SheetHeader } from './SheetHeader'
 import { TONE_NAME } from './tone'
 
@@ -22,8 +21,11 @@ const PRESETS: Array<{ name: string; range: TimeRange }> = [
 /** What a new time starts as: a plain working day, so no preset is picked yet. */
 const NEW_TIME = { start: h(9), end: h(17) }
 
-const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'))
-const MINUTES = ['00', '15', '30', '45']
+/** Minutes from midnight for a time input's `HH:MM` value, down to the 15-minute step; null when empty. */
+function toMinutes(value: string): number | null {
+  const match = /^(\d{2}):(\d{2})/.exec(value)
+  return match ? Math.floor((Number(match[1]) * 60 + Number(match[2])) / STEP) * STEP : null
+}
 
 export const TIME_EDITOR_TITLE = 'time-editor-title'
 
@@ -43,21 +45,25 @@ interface TimeEditorProps {
 export function TimeEditor({ plan, tone, range, dates, onClose, onSave, onSaveAndAddAnother, onDelete }: TimeEditorProps) {
   const initial = range?.kind === 'span' ? range : NEW_TIME
   const [allDay, setAllDay] = useState(range?.kind === 'allDay')
-  const [from, setFrom] = useState(initial.start)
-  const [to, setTo] = useState(initial.end % DAY)
+  // The inputs' own `HH:MM` text, so a half-typed or cleared time stays as the person left it.
+  const [fromText, setFromText] = useState(clock(initial.start))
+  const [toText, setToText] = useState(clock(initial.end))
   const [picked, setPicked] = useState(() => new Set(dates))
 
+  const from = toMinutes(fromText)
+  const to = toMinutes(toText)
   // To at or before From means the time ends the next day.
-  const endsNextDay = !allDay && to <= from
-  const draft: TimeRange = allDay ? ALL_DAY : span(from, endsNextDay ? to + DAY : to)
+  const endsNextDay = !allDay && from !== null && to !== null && to <= from
+  const draft: TimeRange | null =
+    allDay ? ALL_DAY : from === null || to === null ? null : span(from, endsNextDay ? to + DAY : to)
   const chosen = planDates(plan).filter((d) => picked.has(d))
-  const canSave = chosen.length > 0
+  const canSave = draft !== null && chosen.length > 0
 
   const applyPreset = (preset: TimeRange) => {
     if (preset.kind === 'allDay') return setAllDay(true)
     setAllDay(false)
-    setFrom(preset.start)
-    setTo(preset.end % DAY)
+    setFromText(clock(preset.start))
+    setToText(clock(preset.end))
   }
 
   const toggle = (date: IsoDate) =>
@@ -73,9 +79,9 @@ export function TimeEditor({ plan, tone, range, dates, onClose, onSave, onSaveAn
         id={TIME_EDITOR_TITLE}
         tone={tone}
         caption={range ? TONE_NAME[tone] : `New · ${TONE_NAME[tone]}`}
-        title={rangeLabel(draft)}
+        title={draft ? rangeLabel(draft) : 'Pick a time'}
         onClose={onClose}
-        onSave={() => onSave(draft, chosen)}
+        onSave={() => draft && onSave(draft, chosen)}
         saveDisabled={!canSave}
       />
 
@@ -86,7 +92,7 @@ export function TimeEditor({ plan, tone, range, dates, onClose, onSave, onSaveAn
             key={preset.name}
             type="button"
             className="preset hit"
-            aria-pressed={sameRange(preset.range, draft)}
+            aria-pressed={draft !== null && sameRange(preset.range, draft)}
             aria-label={preset.range.kind === 'allDay' ? undefined : `${preset.name}, ${rangeLabel(preset.range)}`}
             onClick={() => applyPreset(preset.range)}
           >
@@ -96,21 +102,21 @@ export function TimeEditor({ plan, tone, range, dates, onClose, onSave, onSaveAn
       </fieldset>
 
       <div className="pickers" data-dimmed={allDay}>
-        <TimeWheels
+        <TimeField
           label="From"
-          value={from}
+          value={fromText}
           onChange={(value) => {
             setAllDay(false)
-            setFrom(value)
+            setFromText(value)
           }}
         />
-        <TimeWheels
+        <TimeField
           label="To"
           tag={endsNextDay ? 'Ends next day' : undefined}
-          value={to}
+          value={toText}
           onChange={(value) => {
             setAllDay(false)
-            setTo(value)
+            setToText(value)
           }}
         />
       </div>
@@ -118,22 +124,23 @@ export function TimeEditor({ plan, tone, range, dates, onClose, onSave, onSaveAn
       <fieldset className="sheet-card">
         <div className="sheet-card-head">
           <legend className="footnote">On these days</legend>
-          <span className={`caption1 ${canSave ? 'secondary' : 'sheet-hint'}`}>
-            {canSave ? pluralDays(chosen.length) : 'Pick at least one day'}
+          <span className={`caption1 ${chosen.length > 0 ? 'secondary' : 'sheet-hint'}`}>
+            {chosen.length > 0 ? pluralDays(chosen.length) : 'Pick at least one day'}
           </span>
         </div>
         <ul className="day-toggles">
           {planDates(plan).map((date) => (
             <li key={date}>
-              <button
-                type="button"
-                className="day-toggle hit"
-                aria-pressed={picked.has(date)}
-                aria-label={dayLabelLong(date)}
-                onClick={() => toggle(date)}
-              >
+              <label className="day-toggle hit">
+                <input
+                  type="checkbox"
+                  className="visually-hidden"
+                  checked={picked.has(date)}
+                  aria-label={dayLabelLong(date)}
+                  onChange={() => toggle(date)}
+                />
                 <span className="caption1 semibold">{dayLabel(date)}</span>
-              </button>
+              </label>
             </li>
           ))}
         </ul>
@@ -143,7 +150,7 @@ export function TimeEditor({ plan, tone, range, dates, onClose, onSave, onSaveAn
         type="button"
         className="sheet-link"
         disabled={!canSave}
-        onClick={() => onSaveAndAddAnother(draft, chosen)}
+        onClick={() => draft && onSaveAndAddAnother(draft, chosen)}
       >
         <Icon name="plus" size={14} stroke={2.6} />
         <span className="footnote semibold">Add another time for these days</span>
@@ -158,36 +165,35 @@ export function TimeEditor({ plan, tone, range, dates, onClose, onSave, onSaveAn
   )
 }
 
-interface TimeWheelsProps {
+interface TimeFieldProps {
   label: string
   tag?: string
-  /** Minutes from midnight, 00:00–23:45. */
-  value: number
-  onChange: (value: number) => void
+  /** The input's `HH:MM` value, or empty. */
+  value: string
+  onChange: (value: string) => void
 }
 
-function TimeWheels({ label, tag, value, onChange }: TimeWheelsProps) {
-  const hour = Math.floor(value / 60)
-  const minute = value % 60
+function TimeField({ label, tag, value, onChange }: TimeFieldProps) {
+  // Typed minutes off the 15-minute step snap down once the field loses focus.
+  const snap = () => {
+    const minutes = toMinutes(value)
+    if (minutes !== null && clock(minutes) !== value) onChange(clock(minutes))
+  }
   return (
-    <div className="picker">
-      <div className="picker-label caption1 semibold secondary caps">
+    <label className="picker">
+      <span className="picker-label caption1 semibold secondary caps">
         <span>{label}</span>
         {tag && <span className="caption2 semibold">{tag}</span>}
-      </div>
-      <div className="picker-box">
-        <span className="picker-band" aria-hidden="true" />
-        <Wheel label={`${label} hour`} values={HOURS} index={hour} onChange={(i) => onChange(i * 60 + minute)} />
-        <span className="headline" aria-hidden="true">
-          :
-        </span>
-        <Wheel
-          label={`${label} minutes`}
-          values={MINUTES}
-          index={minute / STEP}
-          onChange={(i) => onChange(hour * 60 + i * STEP)}
-        />
-      </div>
-    </div>
+      </span>
+      <input
+        type="time"
+        className="time-input"
+        step={STEP * 60}
+        required
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        onBlur={snap}
+      />
+    </label>
   )
 }

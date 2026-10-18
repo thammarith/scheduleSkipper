@@ -60,7 +60,7 @@
   width: 36px;
   height: 5px;
   border-radius: 3px;
-  background: var(--wheel-far);
+  background: var(--grabber);
   margin: 6px auto 0;
 }
 
