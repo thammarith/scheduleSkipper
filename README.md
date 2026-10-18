@@ -11,7 +11,7 @@ pnpm install
 pnpm dev          # http://localhost:5173
 ```
 
-The page loads with the sample plan (Mook’s Birthday, 19 Oct – 1 Nov 2026) in “free” mode. Add `?seed=busy` to the URL to load the busy-mode sample instead. That sample is only there to check the busy screen against its render. In normal use you switch modes with the segmented control, which flips your times.
+The page loads the sample plan (Mook’s Birthday, 19 Oct – 1 Nov 2026) in “free” mode with no times, ready for you to add your own. Add `?seed=free` or `?seed=busy` to the URL to load the sample times shown in the design renders; they are only there to check the screens against those renders. In normal use you switch modes with the segmented control, which flips your times.
 
 Other scripts:
 

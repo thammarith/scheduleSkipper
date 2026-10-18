@@ -54,7 +54,7 @@ export function ListCard({ tone, title, summary, open, onToggle, groups, ...acti
             </ul>
             <button type="button" className="another" onClick={actions.onAddGroup}>
               <Icon name="plus" size={14} stroke={2.6} />
-              <span className="footnote semibold">Another time</span>
+              <span className="footnote semibold">{groups.length > 0 ? 'Another time' : 'Add a time'}</span>
             </button>
           </div>
         </div>
