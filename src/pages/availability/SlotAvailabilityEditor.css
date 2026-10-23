@@ -1,0 +1,44 @@
+.slot-days {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.slot-answers {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.slot-answer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  border-radius: 16px;
+  background: var(--group);
+  color: var(--label-muted);
+  transition: background-color 150ms ease;
+}
+
+.slot-answer[data-state="free"],
+.slot-answer[data-state="ifNeeded"] {
+  background: var(--tone-bg);
+  color: var(--tone-fg);
+  outline: var(--tone-border);
+  outline-offset: -1.5px;
+}
+
+.slot-answer-range {
+  flex: 1;
+  text-align: left;
+}
+
+.slot-answer-state {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}

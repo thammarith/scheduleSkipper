@@ -16,12 +16,14 @@ interface DayCalendarProps {
   /** Dates in the other list, and that list's tone. Picking one moves its overlapping time here. */
   otherTone: Tone
   otherDates: ReadonlySet<IsoDate>
+  /** Days that can be picked; the rest are greyed out. Everything when left out. */
+  allowed?: ReadonlySet<IsoDate>
   /** Goes first in the fieldset, so it must hold the `<legend>`. */
   head: ReactNode
 }
 
 /** The plan's dates in a Monday-first grid, one checkbox per day. */
-export function DayCalendar({ plan, tone, picked, onToggle, otherTone, otherDates, head }: DayCalendarProps) {
+export function DayCalendar({ plan, tone, picked, onToggle, otherTone, otherDates, allowed, head }: DayCalendarProps) {
   return (
     <fieldset className="sheet-card calendar">
       {head}
@@ -38,12 +40,14 @@ export function DayCalendar({ plan, tone, picked, onToggle, otherTone, otherDate
           const selected = picked.has(date)
           const theirs = !selected && otherDates.has(date)
           const holiday = holidayOn(plan, date)
+          const disabled = allowed ? !allowed.has(date) : false
           return (
-            <label key={date} className="calendar-day" data-red={isWeekend(date) || Boolean(holiday)}>
+            <label key={date} className="calendar-day" data-red={isWeekend(date) || Boolean(holiday)} data-disabled={disabled}>
               <input
                 type="checkbox"
                 className="visually-hidden"
                 checked={selected}
+                disabled={disabled}
                 aria-label={[dayLabelLong(date), holiday?.name, theirs && `already ${TONE_PHRASE[otherTone]}`]
                   .filter(Boolean)
                   .join(', ')}

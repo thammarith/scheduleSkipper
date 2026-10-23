@@ -65,6 +65,7 @@ export function DayPicker({
         onToggle={toggle}
         otherTone={otherTone}
         otherDates={other}
+        allowed={new Set(plan.possibleDays)}
         head={<legend className="visually-hidden">Days in the plan</legend>}
       />
 

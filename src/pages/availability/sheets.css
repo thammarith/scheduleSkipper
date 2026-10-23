@@ -423,3 +423,13 @@
   box-shadow: none;
   background: rgb(0 0 0 / 6%);
 }
+
+/* A day the organiser has not allowed. */
+.calendar-day[data-disabled="true"] {
+  cursor: default;
+}
+
+.calendar-day[data-disabled="true"] .calendar-circle {
+  background: none;
+  color: var(--label-tertiary);
+}

@@ -6,6 +6,8 @@ import { clearPrimary, conflicts, datesOf, findGroup, flip, normalise, otherList
 import { dayLabel, planRangeLabel } from '../../utils/date'
 import { rangeSpoken, summary } from '../../utils/format'
 import { Icon } from '../../ui/Icon'
+import { PageNav } from '../../ui/PageNav'
+import { useToast } from '../../ui/Toast'
 import { SegmentedControl } from '../../ui/SegmentedControl'
 import { Sheet } from '../../ui/Sheet'
 import { DayMenu } from './DayMenu'
@@ -13,8 +15,8 @@ import { DAY_PICKER_TITLE, DayPicker } from './DayPickerSheet'
 import { ListCard, type GroupActions } from './ListCard'
 import { SWITCH_TITLE, SwitchMode } from './SwitchModeSheet'
 import { TIME_EDITOR_TITLE, TimeEditor } from './TimeEditorSheet'
+import { SlotAvailabilityEditor } from './SlotAvailabilityEditor'
 import { LIST_TITLE, toneOf } from './tone'
-import './AvailabilityPage.css'
 import './sheets.css'
 
 interface AvailabilityPageProps {
@@ -39,8 +41,9 @@ export function AvailabilityPage({ store, planId }: AvailabilityPageProps) {
 
   if (error) return <p className="page-error body secondary">Couldn’t load this plan. {error}</p>
   if (!loaded) return null
+  const Editor = loaded.plan.slots.length > 0 ? SlotAvailabilityEditor : AvailabilityEditor
   return (
-    <AvailabilityEditor
+    <Editor
       plan={loaded.plan}
       initial={loaded.availability}
       onSave={(availability) => store.saveAvailability(planId, availability)}
@@ -73,7 +76,7 @@ function AvailabilityEditor({ plan, initial, onSave }: AvailabilityEditorProps) 
   const [sheet, setSheet] = useState<SheetState & { id: number }>()
   const [sheetOpen, setSheetOpen] = useState(false)
   const [menu, setMenu] = useState<MenuState>()
-  const [toast, setToast] = useState<{ id: number; text: string }>()
+  const [toast, showToast] = useToast()
   const nextId = useRef(0)
 
   const { mode } = availability
@@ -107,29 +110,15 @@ function AvailabilityEditor({ plan, initial, onSave }: AvailabilityEditorProps) 
 
   const save = async () => {
     await onSave(availability)
-    setToast({ id: ++nextId.current, text: 'Your times are saved' })
+    showToast('Your times are saved')
   }
-
-  useEffect(() => {
-    if (!toast) return
-    const timer = window.setTimeout(() => setToast(undefined), 2200)
-    return () => window.clearTimeout(timer)
-  }, [toast])
 
   const segmentMode = sheetOpen && sheet?.kind === 'switch' ? sheet.to : mode
   const rest = otherMode(mode)
 
   return (
     <main className="page">
-      <nav className="nav" aria-label="Page">
-        {/* Nowhere to go back to yet. */}
-        <button type="button" className="nav-back" aria-label="Back" onClick={() => {}}>
-          <Icon name="chevronLeft" size={22} stroke={2.4} />
-        </button>
-        <button type="button" className="nav-done" aria-label="Done" onClick={save}>
-          <Icon name="check" size={20} stroke={2.6} />
-        </button>
-      </nav>
+      <PageNav onDone={save} />
 
       <header className="page-header">
         <p className="footnote semibold secondary caps">
@@ -265,14 +254,7 @@ function AvailabilityEditor({ plan, initial, onSave }: AvailabilityEditorProps) 
         />
       )}
 
-      <output className="toast-region" aria-live="polite">
-        {toast && (
-          <span key={toast.id} className="toast">
-            <Icon name="check" size={16} stroke={3} />
-            <span className="footnote semibold">{toast.text}</span>
-          </span>
-        )}
-      </output>
+      {toast}
     </main>
   )
 }
