@@ -60,7 +60,7 @@ function toDayMap(groups: Group[], dates: IsoDate[]): DayMap {
   return map
 }
 
-const compareRanges = (a: TimeRange, b: TimeRange) => {
+export const compareRanges = (a: TimeRange, b: TimeRange) => {
   const [as, ae] = a.kind === 'allDay' ? [-1, -1] : [a.start, a.end]
   const [bs, be] = b.kind === 'allDay' ? [-1, -1] : [b.start, b.end]
   return as - bs || ae - be
@@ -125,11 +125,14 @@ function subtract(map: DayMap, mask: Uint8Array, dates: IsoDate[]): DayMap {
 
 /**
  * Puts availability into its canonical shape: dates outside the plan dropped, overlapping or touching
- * spans on the same date merged, a slot in only one list (`winner`, the list just edited, keeps it),
+ * spans on the same date merged, dates the plan doesn't allow dropped, a slot in only one list (`winner`, the list just edited, keeps it),
  * groups keyed by identical range, no empty groups, All day first and then by start time.
  */
-export function normalise(availability: Availability, plan: Plan, winner: ListKey = 'primary'): Availability {
+export function normalise(input: Availability, plan: Plan, winner: ListKey = 'primary'): Availability {
   const dates = planDates(plan)
+  const allowed = new Set(plan.possibleDays)
+  const onlyPossible = (groups: Group[]) => groups.map((g) => ({ ...g, dates: g.dates.filter((d) => allowed.has(d)) }))
+  const availability = { ...input, primary: onlyPossible(input.primary), ifNeeded: onlyPossible(input.ifNeeded) }
   const won = toDayMap(availability[winner], dates)
   const lost = subtract(toDayMap(availability[otherList(winner)], dates), toMask(won, dates), dates)
   const lists = { [winner]: toGroups(won, dates), [otherList(winner)]: toGroups(lost, dates) } as Record<ListKey, Group[]>
@@ -155,9 +158,10 @@ export function derive(availability: Availability, plan: Plan): Map<IsoDate, Slo
 
 /**
  * Regroups slot runs into the fewest groups. Runs are cut at midnight, and a run that crosses midnight
- * is kept whole (one range ending next day) only where that gives fewer groups.
+ * is kept whole (one range ending next day) only where that gives fewer groups, or where the next day is
+ * not an `allowed` date, since the morning part would be dropped there.
  */
-function fewestGroups(mask: Uint8Array, dates: IsoDate[]): Group[] {
+function fewestGroups(mask: Uint8Array, dates: IsoDate[], allowed: ReadonlySet<IsoDate>): Group[] {
   const days: Span[][] = dates.map((_, i) =>
     runs(mask, i * SLOTS_PER_DAY, (i + 1) * SLOTS_PER_DAY).map(([from, to]) => [
       (from - i * SLOTS_PER_DAY) * STEP,
@@ -172,8 +176,10 @@ function fewestGroups(mask: Uint8Array, dates: IsoDate[]): Group[] {
   })
   // ponytail: tries every join choice, 2^joints; past 16 joints it just cuts at midnight. Greedy if plans grow.
   const choices = joints.length <= 16 ? 2 ** joints.length : 1
+  const forced = joints.reduce((bits, i, bit) => (allowed.has(dates[i + 1]) ? bits : bits | (1 << bit)), 0)
   let best: { groups: Group[]; pieces: number } | undefined
   for (let choice = 0; choice < choices; choice++) {
+    if ((choice & forced) !== forced) continue
     const map: DayMap = new Map(dates.map((d, i) => [d, days[i].map((s): Span => [...s])]))
     joints.forEach((i, bit) => {
       if (!((choice >> bit) & 1)) return
@@ -198,10 +204,13 @@ export function flip(availability: Availability, plan: Plan): Availability {
   const dates = planDates(plan)
   const primary = toMask(toDayMap(availability.primary, dates), dates)
   const ifNeeded = toMask(toDayMap(availability.ifNeeded, dates), dates)
+  const allowed = new Set(plan.possibleDays)
   const rest = new Uint8Array(primary.length)
-  for (let k = 0; k < dates.length * SLOTS_PER_DAY; k++) rest[k] = primary[k] || ifNeeded[k] ? 0 : 1
+  for (let k = 0; k < dates.length * SLOTS_PER_DAY; k++) {
+    rest[k] = primary[k] || ifNeeded[k] || !allowed.has(dates[Math.floor(k / SLOTS_PER_DAY)]) ? 0 : 1
+  }
   return normalise(
-    { mode: otherMode(availability.mode), primary: fewestGroups(rest, dates), ifNeeded: availability.ifNeeded },
+    { mode: otherMode(availability.mode), primary: fewestGroups(rest, dates, allowed), ifNeeded: availability.ifNeeded },
     plan,
     'ifNeeded',
   )
@@ -249,3 +258,47 @@ export function conflicts(
 
 export const findGroup = (availability: Availability, list: ListKey, range: TimeRange) =>
   availability[list].find((g) => sameRange(g.range, range))
+
+// ── Answering the organiser's slots ──────────────────────────────────────────
+
+/** Both lists as 15-minute masks. Slot answers only exist in mode "free", where primary means free. */
+function answerMasks(availability: Availability, dates: IsoDate[]) {
+  return {
+    free: toMask(toDayMap(availability.primary, dates), dates),
+    maybe: toMask(toDayMap(availability.ifNeeded, dates), dates),
+  }
+}
+
+/** The cells of `range` on `date`, as indexes into a mask, up to the end of the plan. */
+function slotCells(range: TimeRange, date: IsoDate, dates: IsoDate[]): number[] {
+  const [start, end] = spanOf(range)
+  const base = dates.indexOf(date) * SLOTS_PER_DAY
+  if (base < 0) return []
+  const cells: number[] = []
+  for (let k = base + start / STEP; k < base + end / STEP && k < dates.length * SLOTS_PER_DAY; k++) cells.push(k)
+  return cells
+}
+
+/** How a person answered a slot: free only if all of it is free, busy if any of it is, else "can be free". */
+export function slotState(availability: Availability, plan: Plan, date: IsoDate, range: TimeRange): SlotState {
+  const dates = planDates(plan)
+  const { free, maybe } = answerMasks(availability, dates)
+  const cells = slotCells(range, date, dates).map((k): SlotState => (free[k] ? 'free' : maybe[k] ? 'ifNeeded' : 'busy'))
+  if (cells.length === 0 || cells.includes('busy')) return 'busy'
+  return cells.includes('ifNeeded') ? 'ifNeeded' : 'free'
+}
+
+/** Answers one slot on one date, leaving every other time as it was. Expects mode "free". */
+export function answerSlot(availability: Availability, plan: Plan, date: IsoDate, range: TimeRange, state: SlotState): Availability {
+  const dates = planDates(plan)
+  const { free, maybe } = answerMasks(availability, dates)
+  for (const k of slotCells(range, date, dates)) {
+    free[k] = state === 'free' ? 1 : 0
+    maybe[k] = state === 'ifNeeded' ? 1 : 0
+  }
+  const allowed = new Set(plan.possibleDays)
+  return normalise(
+    { mode: 'free', primary: fewestGroups(free, dates, allowed), ifNeeded: fewestGroups(maybe, dates, allowed) },
+    plan,
+  )
+}

@@ -1,3 +1,5 @@
+import type { TimeRange } from './availability'
+
 /** A calendar date as `YYYY-MM-DD`, with no time zone attached. */
 export type IsoDate = string
 
@@ -13,4 +15,10 @@ export interface Plan {
   start: IsoDate
   end: IsoDate
   holidays: Holiday[]
+  /** The days in the range the organiser allows, in date order. Guests can only answer for these. */
+  possibleDays: IsoDate[]
+  /** The time windows the organiser offers on every possible day. Empty means guests enter their own times. */
+  slots: TimeRange[]
+  /** Days that offer their own windows instead of `slots`. Only possible days, only while `slots` is not empty. */
+  overrides: Record<IsoDate, TimeRange[]>
 }

@@ -14,6 +14,10 @@ export function createMemoryStore(plan: Plan, availability: Availability): Avail
   return {
     getPlan: (planId) => find(plans, planId),
     getAvailability: (planId) => find(availabilities, planId),
+    async savePlan(next) {
+      plans.set(next.id, structuredClone(next))
+      console.info('Saved plan', next.id, next)
+    },
     async saveAvailability(planId, next) {
       availabilities.set(planId, structuredClone(next))
       console.info('Saved availability', planId, next)
