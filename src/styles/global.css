@@ -64,6 +64,13 @@
   --tone-solid: var(--busy-solid);
   --tone-border: 0;
 }
+/* The organiser's setup cards: not a list of the person's times, so they take the app's blue. */
+[data-tone="plan"] {
+  --tone-bg: #e5f1ff;
+  --tone-fg: var(--blue);
+  --tone-solid: var(--blue);
+  --tone-border: 0;
+}
 [data-tone="ifNeeded"] {
   --tone-bg: var(--if-needed-bg);
   --tone-fg: var(--if-needed-fg);

@@ -3,7 +3,7 @@ import type { Tone } from '../../interfaces/availability'
 
 interface SheetHeaderProps {
   id: string
-  tone: Tone
+  tone: Tone | 'plan'
   caption: string
   title: string
   onClose: () => void

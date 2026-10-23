@@ -1,6 +1,9 @@
 # Scheduleskipper
 
-Scheduleskipper finds a time that suits a group. This repo holds the first page: **“When are you free?”**, where one person marks when they can make it within a plan’s dates.
+Scheduleskipper finds a time that suits a group. This repo holds two pages:
+
+- **“When are you free?”** (`#/`): one guest marks when they can make it within a plan’s dates.
+- **“Which days work?”** (`#/setup`): the organiser picks which days are possible and, optionally, the time slots guests choose from.
 
 ## Run it
 
@@ -12,6 +15,10 @@ pnpm dev          # http://localhost:5173
 ```
 
 The page loads the sample plan (Mook’s Birthday, 19 Oct – 1 Nov 2026) in “free” mode with no times, ready for you to add your own. Add `?seed=free` or `?seed=busy` to the URL to load the sample times shown in the design renders; they are only there to check the screens against those renders. In normal use you switch modes with the segmented control, which flips your times.
+
+The organiser's page is at `http://localhost:5173/#/setup`; `?seed=setup` loads a sample plan for it (two weekends and the holiday, two dinner slots, and Sun 25 with its own times). It is there to check the screens against the designs.
+
+On the guest page, a plan without time slots shows the free-form page above, limited to the possible days. A plan with slots shows each possible day with its slots instead; guests tap a slot to cycle busy, free and “can be free”, and can't enter other times.
 
 Other scripts:
 
@@ -26,19 +33,21 @@ pnpm build        # type-check and build to dist/
 ```
 src/
   interfaces/        Types only, no code
-    plan.ts          Plan, holidays, dates
+    plan.ts          Plan, holidays, possible days, time slots and per-day overrides
     availability.ts  Time ranges, groups, availability, modes, tones
     store.ts         AvailabilityStore (where plans and availability come from)
   services/
     memoryStore.ts   In-memory AvailabilityStore (swap for a real API)
   utils/             Pure TypeScript, no React
     date.ts          Plan dates, weekdays, holidays, date labels
-    availability.ts  normalise, derive (per 15-minute slot), flip, edits
+    availability.ts  normalise, derive (per 15-minute slot), flip, edits, answering a slot
+    plan.ts          Possible days, slots and overrides: normalise and edit
     format.ts        Summary lines, range labels ("18:00 – 23:00", "From 20:00", "All day")
   data/
     seed.ts          Sample plan and the two sample availabilities
-  ui/                Shared primitives: Icon, Sheet (<dialog>), SegmentedControl
-  pages/availability The page, its cards, sheets and menu
+  ui/                Shared primitives: Icon, Sheet (<dialog>), SegmentedControl, Disclosure (card), page nav, toast
+  pages/availability The guest page, its cards, sheets and menu, and the slot answers
+  pages/setup        The organiser's page and its sheets
   styles/global.css  Tokens (colours, type scale, spring easing) and base styles
 ```
 
