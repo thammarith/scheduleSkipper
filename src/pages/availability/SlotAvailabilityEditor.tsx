@@ -106,8 +106,10 @@ function DayAnswers({ plan, date, availability, onAnswer }: DayAnswersProps) {
                 onClick={() => onAnswer(range, NEXT[state])}
               >
                 <Icon name={rangeIcon(range)} size={15} stroke={2.4} />
-                <span className="headline tabular slot-answer-range">{rangeLabel(range)}</span>
-                {endsNextDay(range) && <span className="caption2 semibold secondary caps">Ends next day</span>}
+                <span className="slot-answer-range">
+                  <span className="headline tabular">{rangeLabel(range)}</span>
+                  {endsNextDay(range) && <span className="caption2 semibold secondary caps">Ends next day</span>}
+                </span>
                 <span className="slot-answer-state caption1 semibold">
                   {state !== 'busy' && <Mark tone={state} size={10} />}
                   {LABEL[state]}

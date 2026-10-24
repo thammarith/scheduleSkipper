@@ -34,7 +34,16 @@
 
 .slot-answer-range {
   flex: 1;
-  text-align: left;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 6px 0;
+}
+
+.slot-answer-state {
+  flex: none;
+  white-space: nowrap;
 }
 
 .slot-answer-state {
