@@ -2,13 +2,14 @@ import { useState } from 'react'
 import type { Availability, SlotState, TimeRange } from '../../interfaces/availability'
 import type { IsoDate, Plan } from '../../interfaces/plan'
 import { answerSlot, flip, normalise, rangeKey, slotState } from '../../utils/availability'
-import { dayLabelLong, monthOf, monthShort, planRangeLabel, weekdayLong } from '../../utils/date'
+import { dayLabelLong, monthOf, monthShort, weekdayLong } from '../../utils/date'
 import { endsNextDay, rangeLabel, rangeSpoken } from '../../utils/format'
 import { slotsFor } from '../../utils/plan'
 import { Icon } from '../../ui/Icon'
 import { PageNav } from '../../ui/PageNav'
 import { useToast } from '../../ui/Toast'
 import { Mark } from './Mark'
+import { PlanHeader } from './PlanHeader'
 import { rangeIcon } from './tone'
 import './SlotAvailabilityEditor.css'
 
@@ -20,11 +21,12 @@ interface SlotAvailabilityEditorProps {
   plan: Plan
   initial: Availability
   onBack: () => void
+  onEdit: () => void
   onSave: (availability: Availability) => Promise<void>
 }
 
 /** "When are you free?" for a plan whose organiser offers set time slots: guests tap a slot on each possible day. */
-export function SlotAvailabilityEditor({ plan, initial, onBack, onSave }: SlotAvailabilityEditorProps) {
+export function SlotAvailabilityEditor({ plan, initial, onBack, onEdit, onSave }: SlotAvailabilityEditorProps) {
   // Answers are kept as free and "can be free" times; anything not answered counts as busy.
   const [availability, setAvailability] = useState(() =>
     initial.mode === 'free' ? initial : normalise(flip(initial, plan), plan),
@@ -43,12 +45,7 @@ export function SlotAvailabilityEditor({ plan, initial, onBack, onSave }: SlotAv
     <main className="page">
       <PageNav onBack={leave} onDone={save} />
 
-      <header className="page-header">
-        <p className="footnote semibold secondary caps">
-          {plan.name} · {planRangeLabel(plan)}
-        </p>
-        <h1 className="title1">When are you free?</h1>
-      </header>
+      <PlanHeader plan={plan} title="When are you free?" onEdit={onEdit} />
 
       <div className="page-content">
         <ul className="slot-days">

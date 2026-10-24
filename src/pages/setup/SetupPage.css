@@ -165,3 +165,28 @@
   background: var(--cell);
   color: var(--blue);
 }
+
+.name-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.name-input {
+  width: 100%;
+  min-height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--label);
+}
+
+.name-input:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.name-input::placeholder {
+  color: var(--label-tertiary);
+}

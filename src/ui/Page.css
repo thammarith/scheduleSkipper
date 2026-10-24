@@ -74,6 +74,10 @@
   color: var(--tone-fg);
 }
 
+.page-error a {
+  color: var(--blue);
+}
+
 .page-error {
   padding: 120px 24px;
   text-align: center;
@@ -116,4 +120,9 @@
 
 .nav-done:disabled {
   background: var(--label-tertiary);
+}
+
+.page-edit {
+  margin-top: 4px;
+  color: var(--blue);
 }

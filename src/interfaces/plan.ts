@@ -15,6 +15,8 @@ export interface Plan {
   start: IsoDate
   end: IsoDate
   holidays: Holiday[]
+  /** Whether the person using the app organises this plan, so can set it up. */
+  organiser: boolean
   /** The days in the range the organiser allows, in date order. Guests can only answer for these. */
   possibleDays: IsoDate[]
   /** The time windows the organiser offers on every possible day. Empty means guests enter their own times. */

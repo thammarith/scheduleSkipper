@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'react'
 import type { AvailabilityStore } from './interfaces/store'
 import { AvailabilityPage } from './pages/availability/AvailabilityPage'
+import { HomePage } from './pages/home/HomePage'
 import { SetupPage } from './pages/setup/SetupPage'
 
 const subscribe = (notify: () => void) => {
@@ -8,16 +9,29 @@ const subscribe = (notify: () => void) => {
   return () => removeEventListener('hashchange', notify)
 }
 
-/** `#/setup` is the organiser's page; anything else is the guest's. Setup's Done and the guest page's Back link them. */
-export function App({ store, planId }: { store: AvailabilityStore; planId: string }) {
+const go = (hash: string) => () => {
+  location.hash = hash
+}
+
+/**
+ * Routes, by hash: `#/` is home, `#/plan/ID` marks times in a plan and `#/plan/ID/setup` sets it up.
+ */
+export function App({ store }: { store: AvailabilityStore }) {
   const hash = useSyncExternalStore(subscribe, () => location.hash)
-  const go = (to: '#/' | '#/setup') => () => {
-    location.hash = to
+  const [, plan, id, page] = hash.split('/')
+
+  if (plan === 'plan' && id && page === 'setup') {
+    // A plan with no days has nowhere to go back to but home.
+    return <SetupPage store={store} planId={id} onBack={(isNew) => go(isNew ? '#/' : `#/plan/${id}`)()} onSaved={go(`#/plan/${id}`)} />
   }
-  // The organiser sets the plan up, and Done lands on the page guests answer; Back there returns to setup.
-  return hash === '#/setup' ? (
-    <SetupPage store={store} planId={planId} onBack={go('#/')} onSaved={go('#/')} />
-  ) : (
-    <AvailabilityPage store={store} planId={planId} onBack={go('#/setup')} />
+  if (plan === 'plan' && id) {
+    return <AvailabilityPage store={store} planId={id} onBack={go('#/')} onEdit={go(`#/plan/${id}/setup`)} />
+  }
+  return (
+    <HomePage
+      store={store}
+      onNew={() => store.createPlan().then((created) => go(`#/plan/${created.id}/setup`)())}
+      onOpen={(opened) => go(opened.possibleDays.length === 0 ? `#/plan/${opened.id}/setup` : `#/plan/${opened.id}`)()}
+    />
   )
 }

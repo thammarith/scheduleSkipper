@@ -20,7 +20,8 @@ import './SetupPage.css'
 interface SetupPageProps {
   store: AvailabilityStore
   planId: string
-  onBack: () => void
+  /** Says whether the plan has no days yet, since it then has nowhere to go back to but home. */
+  onBack: (isNew: boolean) => void
   /** Called once the plan is saved. */
   onSaved: () => void
 }
@@ -41,9 +42,15 @@ export function SetupPage({ store, planId, onBack, onSaved }: SetupPageProps) {
     }
   }, [store, planId])
 
-  if (error) return <p className="page-error body secondary">Couldn’t load this plan. {error}</p>
+  if (error) {
+    return (
+      <p className="page-error body secondary">
+        Couldn’t load this plan. {error} <a href="#/">Back to plans</a>
+      </p>
+    )
+  }
   if (!plan) return null
-  return <SetupEditor initial={plan} onBack={onBack} onSave={(next) => store.savePlan(next).then(onSaved)} />
+  return <SetupEditor initial={plan} onBack={() => onBack(plan.possibleDays.length === 0)} onSave={(next) => store.savePlan(next).then(onSaved)} />
 }
 
 type SheetState =
@@ -78,7 +85,7 @@ function SetupEditor({ initial, onBack, onSave }: { initial: Plan; onBack: () =>
 
   return (
     <main className="page">
-      <PageNav onBack={leave} onDone={() => onSave(plan)} doneDisabled={plan.possibleDays.length === 0} />
+      <PageNav onBack={leave} onDone={() => onSave({ ...plan, name: plan.name.trim() })} doneDisabled={plan.possibleDays.length === 0 || plan.name.trim() === ''} />
 
       <header className="page-header">
         <p className="footnote semibold secondary caps">Set up your plan</p>
@@ -86,6 +93,18 @@ function SetupEditor({ initial, onBack, onSave }: { initial: Plan; onBack: () =>
       </header>
 
       <div className="page-content">
+        <label className="card name-card">
+          <span className="footnote semibold secondary caps">Plan name</span>
+          <input
+            className="name-input headline"
+            value={plan.name}
+            maxLength={60}
+            required
+            placeholder="What are you planning?"
+            onChange={(event) => setPlan((current) => ({ ...current, name: event.target.value }))}
+          />
+        </label>
+
         <Disclosure
           tone="plan"
           badge={

@@ -1,9 +1,10 @@
 # Scheduleskipper
 
-Scheduleskipper finds a time that suits a group. This repo holds two pages:
+Scheduleskipper finds a time that suits a group. This repo holds the first pages:
 
-- **“When are you free?”** (`#/`): one guest marks when they can make it within a plan’s dates.
-- **“Which days work?”** (`#/setup`): the organiser picks which days are possible and, optionally, the time slots guests choose from.
+- **Plans** (`#/`): the home page. Your plans, what is waiting on you, and a button to start a plan.
+- **“Which days work?”** (`#/plan/ID/setup`): the organiser picks the possible days (any month) and, optionally, the time slots guests choose from, and can give single days their own slots.
+- **“When are you free?”** (`#/plan/ID`): one person marks when they can make it.
 
 ## Run it
 
@@ -14,11 +15,9 @@ pnpm install
 pnpm dev          # http://localhost:5173
 ```
 
-The page loads the sample plan (Mook’s Birthday, 19 Oct – 1 Nov 2026) in “free” mode with no times, ready for you to add your own. Add `?seed=free` or `?seed=busy` to the URL to load the sample times shown in the design renders; they are only there to check the screens against those renders. In normal use you switch modes with the segmented control, which flips your times.
+Mook’s Birthday (19 Oct – 1 Nov 2026) opens in “free” mode with no times, ready for you to add your own. On the free-form page you switch modes with the segmented control, which flips your times.
 
-The organiser's page is at `http://localhost:5173/#/setup`; `?seed=setup` loads a sample plan for it (two weekends and the holiday, two dinner slots, and Sun 25 with its own times). It is there to check the screens against the designs.
-
-The pages link up: Done on the setup page saves the plan and opens the guest page, and Back on the guest page returns to setup. Back on the setup page leaves without saving. Nothing is kept between page loads yet.
+The home page lists three sample plans: Mook’s Birthday (yours, every day possible, no slots), Team Dinner (someone else's, with slots) and Chiang Mai Trip (a draft). The plus button starts a new plan and opens its setup; Done there saves it and opens the page to mark times, and Back on that page returns home. Plans you organise show an “Edit plan” link on the page to mark times. Add `?seed=free`, `?seed=busy` or `?seed=setup` to load the sample times and plan shown in the design renders for Mook’s Birthday (open it from the list); they are only there to check the screens against those renders.
 
 On the guest page, a plan without time slots shows the free-form page above, limited to the possible days. A plan with slots shows each possible day with its slots instead; guests tap a slot to cycle busy, free and “can be free”, and can't enter other times.
 
@@ -48,6 +47,7 @@ src/
   data/
     seed.ts          Sample plan and the two sample availabilities
   ui/                Shared primitives: Icon, Sheet (<dialog>), SegmentedControl, Disclosure (card), page nav, toast
+  pages/home         The plans list
   pages/availability The guest page, its cards, sheets and menu, and the slot answers
   pages/setup        The organiser's page and its sheets
   styles/global.css  Tokens (colours, type scale, spring easing) and base styles

@@ -9,6 +9,12 @@ const toUtc = (date: IsoDate) => Date.parse(`${date}T00:00:00Z`)
 export const addDays = (date: IsoDate, days: number): IsoDate =>
   new Date(toUtc(date) + days * DAY_MS).toISOString().slice(0, 10)
 
+/** Today, on the person's own calendar. */
+export const today = (): IsoDate => {
+  const now = new Date()
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+}
+
 export function planDates(plan: Pick<Plan, 'start' | 'end'>): IsoDate[] {
   const dates: IsoDate[] = []
   for (let date = plan.start; date <= plan.end; date = addDays(date, 1)) dates.push(date)

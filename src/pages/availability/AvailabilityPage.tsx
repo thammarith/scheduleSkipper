@@ -3,7 +3,7 @@ import type { Availability, ListKey, Mode, TimeRange } from '../../interfaces/av
 import type { IsoDate, Plan } from '../../interfaces/plan'
 import type { AvailabilityStore } from '../../interfaces/store'
 import { clearPrimary, conflicts, datesOf, findGroup, flip, normalise, otherList, otherMode, replaceGroup } from '../../utils/availability'
-import { dayLabel, planRangeLabel } from '../../utils/date'
+import { dayLabel } from '../../utils/date'
 import { rangeSpoken, summary } from '../../utils/format'
 import { Icon } from '../../ui/Icon'
 import { PageNav } from '../../ui/PageNav'
@@ -15,6 +15,7 @@ import { DAY_PICKER_TITLE, DayPicker } from './DayPickerSheet'
 import { ListCard, type GroupActions } from './ListCard'
 import { SWITCH_TITLE, SwitchMode } from './SwitchModeSheet'
 import { TIME_EDITOR_TITLE, TimeEditor } from './TimeEditorSheet'
+import { PlanHeader } from './PlanHeader'
 import { SlotAvailabilityEditor } from './SlotAvailabilityEditor'
 import { LIST_TITLE, toneOf } from './tone'
 import './sheets.css'
@@ -23,10 +24,11 @@ interface AvailabilityPageProps {
   store: AvailabilityStore
   planId: string
   onBack: () => void
+  onEdit: () => void
 }
 
 /** "When are you free?": one person marks when they can make it within a plan. */
-export function AvailabilityPage({ store, planId, onBack }: AvailabilityPageProps) {
+export function AvailabilityPage({ store, planId, onBack, onEdit }: AvailabilityPageProps) {
   const [loaded, setLoaded] = useState<{ plan: Plan; availability: Availability }>()
   const [error, setError] = useState<string>()
 
@@ -40,10 +42,20 @@ export function AvailabilityPage({ store, planId, onBack }: AvailabilityPageProp
     }
   }, [store, planId])
 
-  if (error) return <p className="page-error body secondary">Couldn’t load this plan. {error}</p>
+  if (error) {
+    return (
+      <p className="page-error body secondary">
+        Couldn’t load this plan. {error} <a href="#/">Back to plans</a>
+      </p>
+    )
+  }
   if (!loaded) return null
   if (loaded.plan.possibleDays.length === 0) {
-    return <p className="page-error body secondary">The organiser hasn’t picked any days for this plan yet.</p>
+    return (
+      <p className="page-error body secondary">
+        {loaded.plan.organiser ? 'This plan has no days yet.' : 'The organiser hasn’t picked any days for this plan yet.'}
+      </p>
+    )
   }
   const Editor = loaded.plan.slots.length > 0 ? SlotAvailabilityEditor : AvailabilityEditor
   return (
@@ -51,6 +63,7 @@ export function AvailabilityPage({ store, planId, onBack }: AvailabilityPageProp
       plan={loaded.plan}
       initial={loaded.availability}
       onBack={onBack}
+      onEdit={onEdit}
       onSave={(availability) => store.saveAvailability(planId, availability)}
     />
   )
@@ -72,10 +85,11 @@ interface AvailabilityEditorProps {
   plan: Plan
   initial: Availability
   onBack: () => void
+  onEdit: () => void
   onSave: (availability: Availability) => Promise<void>
 }
 
-function AvailabilityEditor({ plan, initial, onBack, onSave }: AvailabilityEditorProps) {
+function AvailabilityEditor({ plan, initial, onBack, onEdit, onSave }: AvailabilityEditorProps) {
   const [availability, setAvailability] = useState(initial)
   const [saved, setSaved] = useState(initial)
   const [expanded, setExpanded] = useState<Record<ListKey, boolean>>({ primary: true, ifNeeded: false })
@@ -129,12 +143,7 @@ function AvailabilityEditor({ plan, initial, onBack, onSave }: AvailabilityEdito
     <main className="page">
       <PageNav onBack={leave} onDone={save} />
 
-      <header className="page-header">
-        <p className="footnote semibold secondary caps">
-          {plan.name} · {planRangeLabel(plan)}
-        </p>
-        <h1 className="title1">When are you free?</h1>
-      </header>
+      <PlanHeader plan={plan} title="When are you free?" onEdit={onEdit} />
 
       <div className="page-content">
         <SegmentedControl

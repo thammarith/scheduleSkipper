@@ -11,6 +11,7 @@ const basePlan = {
   start: '2026-10-19',
   end: '2026-11-01',
   holidays: [{ date: '2026-10-23', name: 'Chulalongkorn Day' }],
+  organiser: true,
 }
 
 /** Every day allowed and no slots: guests enter their own times. */
@@ -44,4 +45,30 @@ export const seedBusy: Availability = {
     { range: span(h(20), h(24)), dates: ['2026-10-21'] },
   ],
   ifNeeded: [{ range: ALL_DAY, dates: ['2026-10-23'] }],
+}
+
+/** Someone else's plan, with slots and nothing marked yet: it asks for the person's times on the home page. */
+export const seedDinner: Plan = {
+  id: 'team-dinner',
+  name: 'Team Dinner',
+  start: '2026-10-30',
+  end: '2026-11-01',
+  holidays: [],
+  organiser: false,
+  possibleDays: ['2026-10-30', '2026-10-31', '2026-11-01'],
+  slots: [span(h(18), h(20)), span(h(19), h(21))],
+  overrides: {},
+}
+
+/** A plan the person has started but not set up. */
+export const seedTrip: Plan = {
+  id: 'chiang-mai-trip',
+  name: 'Chiang Mai Trip',
+  start: '2026-10-24',
+  end: '2026-10-24',
+  holidays: [],
+  organiser: true,
+  possibleDays: [],
+  slots: [],
+  overrides: {},
 }
