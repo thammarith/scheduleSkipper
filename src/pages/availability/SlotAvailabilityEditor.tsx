@@ -29,16 +29,19 @@ export function SlotAvailabilityEditor({ plan, initial, onBack, onSave }: SlotAv
   const [availability, setAvailability] = useState(() =>
     initial.mode === 'free' ? initial : normalise(flip(initial, plan), plan),
   )
+  const [saved, setSaved] = useState(availability)
   const [toast, showToast] = useToast()
 
   const save = async () => {
     await onSave(availability)
+    setSaved(availability)
     showToast('Your times are saved')
   }
+  const leave = () => (JSON.stringify(availability) === JSON.stringify(saved) || confirm('Leave without saving your times?')) && onBack()
 
   return (
     <main className="page">
-      <PageNav onBack={onBack} onDone={save} />
+      <PageNav onBack={leave} onDone={save} />
 
       <header className="page-header">
         <p className="footnote semibold secondary caps">

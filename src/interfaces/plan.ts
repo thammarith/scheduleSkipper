@@ -19,6 +19,6 @@ export interface Plan {
   possibleDays: IsoDate[]
   /** The time windows the organiser offers on every possible day. Empty means guests enter their own times. */
   slots: TimeRange[]
-  /** Days that offer their own windows instead of `slots`. Only possible days, only while `slots` is not empty. */
+  /** Days that offer their own windows instead of `slots`. Only used on possible days, and while `slots` is not empty. */
   overrides: Record<IsoDate, TimeRange[]>
 }

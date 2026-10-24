@@ -42,6 +42,9 @@ export function AvailabilityPage({ store, planId, onBack }: AvailabilityPageProp
 
   if (error) return <p className="page-error body secondary">Couldn’t load this plan. {error}</p>
   if (!loaded) return null
+  if (loaded.plan.possibleDays.length === 0) {
+    return <p className="page-error body secondary">The organiser hasn’t picked any days for this plan yet.</p>
+  }
   const Editor = loaded.plan.slots.length > 0 ? SlotAvailabilityEditor : AvailabilityEditor
   return (
     <Editor
@@ -74,6 +77,7 @@ interface AvailabilityEditorProps {
 
 function AvailabilityEditor({ plan, initial, onBack, onSave }: AvailabilityEditorProps) {
   const [availability, setAvailability] = useState(initial)
+  const [saved, setSaved] = useState(initial)
   const [expanded, setExpanded] = useState<Record<ListKey, boolean>>({ primary: true, ifNeeded: false })
   // The sheet's content outlives `sheetOpen` so it can animate out; `id` remounts it with a fresh draft.
   const [sheet, setSheet] = useState<SheetState & { id: number }>()
@@ -113,15 +117,17 @@ function AvailabilityEditor({ plan, initial, onBack, onSave }: AvailabilityEdito
 
   const save = async () => {
     await onSave(availability)
+    setSaved(availability)
     showToast('Your times are saved')
   }
+  const leave = () => (JSON.stringify(availability) === JSON.stringify(saved) || confirm('Leave without saving your times?')) && onBack()
 
   const segmentMode = sheetOpen && sheet?.kind === 'switch' ? sheet.to : mode
   const rest = otherMode(mode)
 
   return (
     <main className="page">
-      <PageNav onBack={onBack} onDone={save} />
+      <PageNav onBack={leave} onDone={save} />
 
       <header className="page-header">
         <p className="footnote semibold secondary caps">

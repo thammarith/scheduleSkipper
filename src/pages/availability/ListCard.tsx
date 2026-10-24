@@ -6,7 +6,7 @@ import { endsNextDay, rangeLabel, rangeSpoken } from '../../utils/format'
 import { Disclosure } from '../../ui/Disclosure'
 import { Icon } from '../../ui/Icon'
 import { Badge, Mark } from './Mark'
-import { rangeIcon } from './tone'
+import { rangeIcon, TONE_NAME } from './tone'
 import './ListCard.css'
 
 export interface GroupActions {
@@ -46,7 +46,8 @@ export function ListCard({ tone, title, summary, open, onToggle, groups, ...acti
 
 function TimeGroup({ tone, group, onEditGroup, onAddDays, onDayMenu }: { tone: Tone; group: Group } & GroupActions) {
   const { range, dates } = group
-  const spoken = rangeSpoken(range)
+  // The list's name tells apart the same time in the other list.
+  const spoken = `${rangeSpoken(range)}, ${TONE_NAME[tone].toLowerCase()}`
   return (
     <div className="group">
       <button type="button" className="group-head" aria-label={`Edit ${spoken}`} onClick={() => onEditGroup(range)}>

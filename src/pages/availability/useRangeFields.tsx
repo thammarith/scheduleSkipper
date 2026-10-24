@@ -33,10 +33,11 @@ export function useRangeFields(range: TimeRange | null): { draft: TimeRange | nu
 
   const from = parseClock(fromText)
   const to = parseClock(toText)
-  // To at or before From means the time ends the next day.
-  const endsNextDay = !allDay && from !== null && to !== null && to <= from
+  // To before From means the time ends the next day. The same time would be a whole day: that is "All day".
+  const sameTime = !allDay && from !== null && from === to
+  const endsNextDay = !allDay && from !== null && to !== null && to < from
   const draft: TimeRange | null =
-    allDay ? ALL_DAY : from === null || to === null ? null : span(from, endsNextDay ? to + DAY : to)
+    allDay ? ALL_DAY : from === null || to === null || sameTime ? null : span(from, endsNextDay ? to + DAY : to)
 
   const applyPreset = (preset: TimeRange) => {
     if (preset.kind === 'allDay') return setAllDay(true)
@@ -86,6 +87,7 @@ export function useRangeFields(range: TimeRange | null): { draft: TimeRange | nu
           }}
         />
       </div>
+      {sameTime && <p className="caption1 sheet-hint fields-hint">Start and end can’t be the same. For a whole day, pick All day.</p>}
     </>
   )
   return { draft, fields }

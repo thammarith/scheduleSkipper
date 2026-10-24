@@ -2,6 +2,7 @@ import type { TimeRange } from '../interfaces/availability'
 import type { IsoDate, Plan } from '../interfaces/plan'
 import { DAY, STEP } from './availability'
 import { dayLabel } from './date'
+import { overriddenDays } from './plan'
 
 const pad = (n: number) => String(n).padStart(2, '0')
 
@@ -48,7 +49,7 @@ const pluralSlots = (n: number) => `${n} ${n === 1 ? 'slot' : 'slots'}`
 export function slotsSummary(plan: Plan, short = false): string {
   if (plan.slots.length === 0) return 'None · guests enter their own times'
   if (short) return `${pluralSlots(plan.slots.length)} · every possible day`
-  const differs = Object.keys(plan.overrides).length
+  const differs = overriddenDays(plan).length
   return [
     pluralSlots(plan.slots.length),
     plan.slots.map(rangeLabel).join(', '),

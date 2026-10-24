@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { TimeRange } from '../../interfaces/availability'
 import type { IsoDate } from '../../interfaces/plan'
-import { rangeKey } from '../../utils/availability'
+import { rangeKey, sameRange } from '../../utils/availability'
 import { dayLabel, dayLabelLong } from '../../utils/date'
 import { rangeLabel, rangeSpoken } from '../../utils/format'
 import { tidySlots } from '../../utils/plan'
@@ -28,7 +28,8 @@ interface OverrideEditorProps {
 /** The body of the sheet that gives one day its own time slots. Mount it afresh for each day. */
 export function OverrideEditor({ date, ranges, defaults, overridden, onClose, onSave, onReset, onRemoveDay }: OverrideEditorProps) {
   const [list, setList] = useState(() => tidySlots(ranges))
-  const { draft, fields } = useRangeFields(null)
+  // The form to add a time is open until a time is added or cancelled, and Save waits for that.
+  const [adding, setAdding] = useState(ranges.length === 0)
 
   return (
     <div data-tone="plan">
@@ -39,7 +40,7 @@ export function OverrideEditor({ date, ranges, defaults, overridden, onClose, on
         title={dayLabelLong(date)}
         onClose={onClose}
         onSave={() => onSave(list)}
-        saveDisabled={list.length === 0}
+        saveDisabled={list.length === 0 || adding}
       />
 
       <ul className="sheet-card override-list" aria-label={`Time slots on ${dayLabel(date)}`}>
@@ -59,16 +60,21 @@ export function OverrideEditor({ date, ranges, defaults, overridden, onClose, on
         {list.length === 0 && <li className="caption1 sheet-hint">Add at least one time</li>}
       </ul>
 
-      {fields}
-      <button
-        type="button"
-        className="sheet-link"
-        disabled={!draft}
-        onClick={() => draft && setList((current) => tidySlots([...current, draft]))}
-      >
-        <Icon name="plus" size={14} stroke={2.6} />
-        <span className="footnote semibold">Add this time</span>
-      </button>
+      {adding ? (
+        <NewTime
+          taken={list}
+          onAdd={(range) => {
+            setList((current) => tidySlots([...current, range]))
+            setAdding(false)
+          }}
+          onCancel={list.length > 0 ? () => setAdding(false) : undefined}
+        />
+      ) : (
+        <button type="button" className="sheet-link" onClick={() => setAdding(true)}>
+          <Icon name="plus" size={14} stroke={2.6} />
+          <span className="footnote semibold">Add a time</span>
+        </button>
+      )}
 
       <p className="caption1 secondary override-note">
         {defaults.length > 0
@@ -85,6 +91,33 @@ export function OverrideEditor({ date, ranges, defaults, overridden, onClose, on
         Remove this day from the plan
       </button>
     </div>
+  )
+}
+
+interface NewTimeProps {
+  taken: TimeRange[]
+  onAdd: (range: TimeRange) => void
+  /** Missing while there is nothing yet to go back to. */
+  onCancel?: () => void
+}
+
+function NewTime({ taken, onAdd, onCancel }: NewTimeProps) {
+  const { draft, fields } = useRangeFields(null)
+  const duplicate = draft !== null && taken.some((range) => sameRange(range, draft))
+  return (
+    <>
+      {fields}
+      {duplicate && <p className="caption1 sheet-hint fields-hint">That time is already in the list.</p>}
+      <button type="button" className="sheet-link" disabled={!draft || duplicate} onClick={() => draft && onAdd(draft)}>
+        <Icon name="plus" size={14} stroke={2.6} />
+        <span className="footnote semibold">Add this time</span>
+      </button>
+      {onCancel && (
+        <button type="button" className="sheet-link" onClick={onCancel}>
+          <span className="footnote">Cancel</span>
+        </button>
+      )}
+    </>
   )
 }
 

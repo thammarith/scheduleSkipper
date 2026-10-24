@@ -433,3 +433,7 @@
   background: none;
   color: var(--label-tertiary);
 }
+
+.fields-hint {
+  margin: 8px 6px 0;
+}

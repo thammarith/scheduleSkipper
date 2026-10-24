@@ -13,16 +13,17 @@ const sameSlots = (a: TimeRange[], b: TimeRange[]) => a.length === b.length && a
 
 /**
  * Puts a plan into its canonical shape: possible days inside the range and in date order, windows tidy,
- * and overrides only where they differ from `slots` on a possible day (none at all without `slots`).
+ * and overrides only where they differ from `slots`. An override on a day that is not possible, or while there
+ * are no `slots`, is kept so it comes back with the day or the slots, but nothing uses it meanwhile.
  */
 export function normalisePlan(plan: Plan): Plan {
   const inRange = new Set(planDates(plan))
   const possibleDays = [...new Set(plan.possibleDays)].filter((d) => inRange.has(d)).sort()
   const slots = tidySlots(plan.slots)
   const overrides: Plan['overrides'] = {}
-  for (const date of possibleDays) {
+  for (const date of inRange) {
     const own = tidySlots(plan.overrides[date] ?? [])
-    if (slots.length > 0 && own.length > 0 && !sameSlots(own, slots)) overrides[date] = own
+    if (own.length > 0 && !sameSlots(own, slots)) overrides[date] = own
   }
   return { ...plan, possibleDays, slots, overrides }
 }
@@ -44,3 +45,7 @@ export const setOverride = (plan: Plan, date: IsoDate, slots: TimeRange[] | null
   return normalisePlan({ ...plan, overrides: slots ? { ...rest, [date]: slots } : rest })
 }
 
+
+/** The days whose own slots guests see: overridden, possible, and with default slots to differ from. */
+export const overriddenDays = (plan: Plan): IsoDate[] =>
+  plan.slots.length === 0 ? [] : plan.possibleDays.filter((date) => date in plan.overrides)

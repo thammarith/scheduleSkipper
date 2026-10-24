@@ -5,7 +5,7 @@ import type { AvailabilityStore } from '../../interfaces/store'
 import { rangeKey, sameRange } from '../../utils/availability'
 import { dayLabel } from '../../utils/date'
 import { endsNextDay, rangeLabel, rangeSpoken, slotsSummary, summary } from '../../utils/format'
-import { normalisePlan, setOverride, setSlots, slotsFor, togglePossibleDay } from '../../utils/plan'
+import { normalisePlan, overriddenDays, setOverride, setSlots, slotsFor, togglePossibleDay } from '../../utils/plan'
 import { Disclosure } from '../../ui/Disclosure'
 import { Icon } from '../../ui/Icon'
 import { PageNav } from '../../ui/PageNav'
@@ -68,15 +68,17 @@ function SetupEditor({ initial, onBack, onSave }: { initial: Plan; onBack: () =>
     closeSheet()
   }
 
+  // Back asks first when something would be lost.
+  const leave = () => (JSON.stringify(plan) === JSON.stringify(initial) || confirm('Leave without saving your changes?')) && onBack()
   const hasSlots = plan.slots.length > 0
-  const overridden = Object.keys(plan.overrides).sort()
-  const canOverride = plan.possibleDays.some((date) => !(date in plan.overrides))
+  const overridden = overriddenDays(plan)
+  const canOverride = plan.possibleDays.some((date) => !overridden.includes(date))
   const allowed = new Set(plan.possibleDays)
   const toggle = (key: 'days' | 'slots') => setOpen((current) => ({ ...current, [key]: !current[key] }))
 
   return (
     <main className="page">
-      <PageNav onBack={onBack} onDone={() => onSave(plan)} />
+      <PageNav onBack={leave} onDone={() => onSave(plan)} doneDisabled={plan.possibleDays.length === 0} />
 
       <header className="page-header">
         <p className="footnote semibold secondary caps">Set up your plan</p>
@@ -105,6 +107,7 @@ function SetupEditor({ initial, onBack, onSave }: { initial: Plan; onBack: () =>
             otherDates={new Set()}
             head={<legend className="visually-hidden">Days guests can answer for</legend>}
           />
+          {plan.possibleDays.length === 0 && <p className="caption1 sheet-hint">Pick at least one day.</p>}
           <CalendarNotes plan={plan} picked={allowed} otherTone="busy" otherDates={new Set()} />
         </Disclosure>
 
@@ -200,6 +203,7 @@ function SetupEditor({ initial, onBack, onSave }: { initial: Plan; onBack: () =>
           <SlotEditor
             key={sheet.id}
             range={sheet.range}
+            others={plan.slots.filter((r) => !sheet.range || !sameRange(r, sheet.range))}
             onClose={closeSheet}
             onSave={(range) =>
               update((current) =>
@@ -215,7 +219,7 @@ function SetupEditor({ initial, onBack, onSave }: { initial: Plan; onBack: () =>
         {sheet?.kind === 'pick' && (
           <OverridePicker
             key={sheet.id}
-            dates={plan.possibleDays.filter((date) => !(date in plan.overrides))}
+            dates={plan.possibleDays.filter((date) => !overridden.includes(date))}
             onClose={closeSheet}
             onPick={(date) => showSheet({ kind: 'override', date })}
           />
@@ -229,7 +233,7 @@ function SetupEditor({ initial, onBack, onSave }: { initial: Plan; onBack: () =>
             date={sheet.date}
             ranges={slotsFor(plan, sheet.date)}
             defaults={plan.slots}
-            overridden={sheet.date in plan.overrides}
+            overridden={overridden.includes(sheet.date)}
             onClose={closeSheet}
             onSave={(ranges) => update((current) => setOverride(current, sheet.date, ranges))}
             onReset={() => update((current) => setOverride(current, sheet.date, null))}
