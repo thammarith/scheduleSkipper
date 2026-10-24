@@ -3,7 +3,7 @@ import type { TimeRange } from '../../interfaces/availability'
 import type { IsoDate, Plan } from '../../interfaces/plan'
 import type { AvailabilityStore } from '../../interfaces/store'
 import { rangeKey, sameRange } from '../../utils/availability'
-import { dayLabel } from '../../utils/date'
+import { dayLabel, weekday } from '../../utils/date'
 import { endsNextDay, rangeLabel, rangeSpoken, slotsSummary, summary } from '../../utils/format'
 import { normalisePlan, overriddenDays, setOverride, setSlots, slotsFor, togglePossibleDay } from '../../utils/plan'
 import { Disclosure } from '../../ui/Disclosure'
@@ -159,7 +159,10 @@ function SetupEditor({ initial, onBack, onSave }: { initial: Plan; onBack: () =>
                 <ul>
                   {overridden.map((date) => (
                     <li key={date} className="override-row">
-                      <span className="override-date footnote semibold">{dayLabel(date)}</span>
+                      <span className="override-date footnote semibold" aria-hidden="true">
+                        <span data-sunday={weekday(date) === 0}>{dayLabel(date).split(' ')[0]}</span>
+                        <span>{Number(date.slice(8))}</span>
+                      </span>
                       <span className="override-ranges body">
                         {plan.overrides[date].map(rangeLabel).join(', ')}
                         <span className="caption1 secondary">Instead of the slots above</span>

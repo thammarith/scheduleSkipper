@@ -68,6 +68,7 @@
 .override-date {
   flex: none;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 52px;
@@ -76,6 +77,11 @@
   background: var(--if-needed-bg);
   color: var(--if-needed-fg);
   text-align: center;
+  line-height: 16px;
+}
+
+.override-date [data-sunday="true"] {
+  color: var(--red);
 }
 
 .override-ranges {
