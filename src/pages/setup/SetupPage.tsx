@@ -10,9 +10,9 @@ import { Disclosure } from '../../ui/Disclosure'
 import { Icon } from '../../ui/Icon'
 import { PageNav } from '../../ui/PageNav'
 import { Sheet } from '../../ui/Sheet'
-import { CalendarNotes, DayCalendar } from '../availability/DayCalendar'
 import { rangeIcon } from '../availability/tone'
 import '../availability/sheets.css'
+import { MonthCalendar } from './MonthCalendar'
 import { OVERRIDE_PICKER_TITLE, OVERRIDE_TITLE, OverrideEditor, OverridePicker } from './OverrideSheet'
 import { SLOT_EDITOR_TITLE, SlotEditor } from './SlotEditorSheet'
 import './SetupPage.css'
@@ -98,17 +98,8 @@ function SetupEditor({ initial, onBack, onSave }: { initial: Plan; onBack: () =>
           open={open.days}
           onToggle={() => toggle('days')}
         >
-          <DayCalendar
-            plan={plan}
-            tone="free"
-            picked={allowed}
-            onToggle={(date) => setPlan((current) => togglePossibleDay(current, date))}
-            otherTone="busy"
-            otherDates={new Set()}
-            head={<legend className="visually-hidden">Days guests can answer for</legend>}
-          />
+          <MonthCalendar plan={plan} picked={allowed} onToggle={(date) => setPlan((current) => togglePossibleDay(current, date))} />
           {plan.possibleDays.length === 0 && <p className="caption1 sheet-hint">Pick at least one day.</p>}
-          <CalendarNotes plan={plan} picked={allowed} otherTone="busy" otherDates={new Set()} />
         </Disclosure>
 
         <Disclosure

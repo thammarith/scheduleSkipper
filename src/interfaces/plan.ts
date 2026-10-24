@@ -11,7 +11,7 @@ export interface Holiday {
 export interface Plan {
   id: string
   name: string
-  /** First and last day of the plan, both inclusive. */
+  /** First and last day of the plan, both inclusive. They follow the possible days. */
   start: IsoDate
   end: IsoDate
   holidays: Holiday[]

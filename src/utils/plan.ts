@@ -1,7 +1,6 @@
 import type { TimeRange } from '../interfaces/availability'
 import type { IsoDate, Plan } from '../interfaces/plan'
 import { compareRanges, isValidRange, rangeKey } from './availability'
-import { planDates } from './date'
 
 /** Valid windows, one of each, in the order they read: All day first, then by start time. */
 export function tidySlots(slots: TimeRange[]): TimeRange[] {
@@ -12,20 +11,21 @@ export function tidySlots(slots: TimeRange[]): TimeRange[] {
 const sameSlots = (a: TimeRange[], b: TimeRange[]) => a.length === b.length && a.every((r, i) => rangeKey(r) === rangeKey(b[i]))
 
 /**
- * Puts a plan into its canonical shape: possible days inside the range and in date order, windows tidy,
- * and overrides only where they differ from `slots`. An override on a day that is not possible, or while there
- * are no `slots`, is kept so it comes back with the day or the slots, but nothing uses it meanwhile.
+ * Puts a plan into its canonical shape: possible days unique and in date order, the range running from the
+ * first possible day to the last (unchanged while there are none), windows tidy, and overrides only where
+ * they differ from `slots`. An override on a day that is not possible, or while there are no `slots`, is kept
+ * so it comes back with the day or the slots, but nothing uses it meanwhile.
  */
 export function normalisePlan(plan: Plan): Plan {
-  const inRange = new Set(planDates(plan))
-  const possibleDays = [...new Set(plan.possibleDays)].filter((d) => inRange.has(d)).sort()
+  const possibleDays = [...new Set(plan.possibleDays)].sort()
   const slots = tidySlots(plan.slots)
   const overrides: Plan['overrides'] = {}
-  for (const date of inRange) {
-    const own = tidySlots(plan.overrides[date] ?? [])
+  for (const [date, ranges] of Object.entries(plan.overrides)) {
+    const own = tidySlots(ranges)
     if (own.length > 0 && !sameSlots(own, slots)) overrides[date] = own
   }
-  return { ...plan, possibleDays, slots, overrides }
+  const range = possibleDays.length > 0 ? { start: possibleDays[0], end: possibleDays[possibleDays.length - 1] } : plan
+  return { ...plan, start: range.start, end: range.end, possibleDays, slots, overrides }
 }
 
 /** The windows guests choose from on a date. */

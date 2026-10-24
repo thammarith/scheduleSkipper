@@ -16,6 +16,8 @@ interface DayCalendarProps {
   /** Dates in the other list, and that list's tone. Picking one moves its overlapping time here. */
   otherTone: Tone
   otherDates: ReadonlySet<IsoDate>
+  /** The dates to show, in order. The plan's whole range when left out. */
+  dates?: IsoDate[]
   /** Days that can be picked; the rest are greyed out. Everything when left out. */
   allowed?: ReadonlySet<IsoDate>
   /** Goes first in the fieldset, so it must hold the `<legend>`. */
@@ -23,7 +25,7 @@ interface DayCalendarProps {
 }
 
 /** The plan's dates in a Monday-first grid, one checkbox per day. */
-export function DayCalendar({ plan, tone, picked, onToggle, otherTone, otherDates, allowed, head }: DayCalendarProps) {
+export function DayCalendar({ plan, tone, picked, onToggle, otherTone, otherDates, allowed, dates = planDates(plan), head }: DayCalendarProps) {
   return (
     <fieldset className="sheet-card calendar">
       {head}
@@ -33,10 +35,10 @@ export function DayCalendar({ plan, tone, picked, onToggle, otherTone, otherDate
             {initial}
           </abbr>
         ))}
-        {Array.from({ length: weekdayMondayFirst(plan.start) }, (_, i) => (
+        {Array.from({ length: weekdayMondayFirst(dates[0]) }, (_, i) => (
           <span key={`blank-${i}`} />
         ))}
-        {planDates(plan).map((date) => {
+        {dates.map((date) => {
           const selected = picked.has(date)
           const theirs = !selected && otherDates.has(date)
           const holiday = holidayOn(plan, date)
@@ -76,14 +78,15 @@ export function DayCalendar({ plan, tone, picked, onToggle, otherTone, otherDate
 
 interface CalendarNotesProps {
   plan: Plan
+  /** The dates the calendar shows. The plan's whole range when left out. */
+  dates?: IsoDate[]
   picked: ReadonlySet<IsoDate>
   otherTone: Tone
   otherDates: ReadonlySet<IsoDate>
 }
 
 /** The key under a `DayCalendar`: the plan's holidays, and what the other list's dot means. */
-export function CalendarNotes({ plan, picked, otherTone, otherDates }: CalendarNotesProps) {
-  const dates = planDates(plan)
+export function CalendarNotes({ plan, picked, otherTone, otherDates, dates = planDates(plan) }: CalendarNotesProps) {
   const showsOther = dates.some((d) => otherDates.has(d) && !picked.has(d))
   return (
     <ul className="calendar-notes">

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { Availability, SlotState, TimeRange } from '../../interfaces/availability'
 import type { IsoDate, Plan } from '../../interfaces/plan'
 import { answerSlot, flip, normalise, rangeKey, slotState } from '../../utils/availability'
-import { dayLabelLong, planRangeLabel, weekdayLong } from '../../utils/date'
+import { dayLabelLong, monthOf, monthShort, planRangeLabel, weekdayLong } from '../../utils/date'
 import { endsNextDay, rangeLabel, rangeSpoken } from '../../utils/format'
 import { slotsFor } from '../../utils/plan'
 import { Icon } from '../../ui/Icon'
@@ -52,10 +52,11 @@ export function SlotAvailabilityEditor({ plan, initial, onBack, onSave }: SlotAv
 
       <div className="page-content">
         <ul className="slot-days">
-          {plan.possibleDays.map((date) => (
+          {plan.possibleDays.map((date, i) => (
             <li key={date}>
               <DayAnswers
                 plan={plan}
+                showMonth={i === 0 || monthOf(date) !== monthOf(plan.possibleDays[i - 1])}
                 date={date}
                 availability={availability}
                 onAnswer={(range, state) => setAvailability((a) => answerSlot(a, plan, date, range, state))}
@@ -81,16 +82,18 @@ export function SlotAvailabilityEditor({ plan, initial, onBack, onSave }: SlotAv
 
 interface DayAnswersProps {
   plan: Plan
+  /** Says the month too, on the first day of each month shown. */
+  showMonth: boolean
   date: IsoDate
   availability: Availability
   onAnswer: (range: TimeRange, state: SlotState) => void
 }
 
-function DayAnswers({ plan, date, availability, onAnswer }: DayAnswersProps) {
+function DayAnswers({ plan, showMonth, date, availability, onAnswer }: DayAnswersProps) {
   return (
     <section className="card slot-day" aria-label={dayLabelLong(date)}>
       <h2 className="headline">
-        {weekdayLong(date)} <span className="secondary">{Number(date.slice(8))}</span>
+        {weekdayLong(date)} <span className="secondary">{Number(date.slice(8))}{showMonth && ` ${monthShort(date)}`}</span>
       </h2>
       <ul className="slot-answers">
         {slotsFor(plan, date).map((range) => {

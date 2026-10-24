@@ -42,3 +42,30 @@ export const dayLabelLong = (date: IsoDate) => `${weekdayLong(date)} ${longDate.
 /** "19 Oct – 1 Nov" */
 export const planRangeLabel = (plan: Plan) =>
   `${shortDate.format(toUtc(plan.start))} – ${shortDate.format(toUtc(plan.end))}`
+
+/** A month as `YYYY-MM`. */
+export type YearMonth = string
+
+export const monthOf = (date: IsoDate): YearMonth => date.slice(0, 7)
+
+/** Every date of a month, in order. */
+export function datesInMonth(month: YearMonth): IsoDate[] {
+  const dates: IsoDate[] = []
+  for (let date = `${month}-01`; monthOf(date) === month; date = addDays(date, 1)) dates.push(date)
+  return dates
+}
+
+/** The month `count` months after (or before, if negative) `month`. */
+export function shiftMonth(month: YearMonth, count: number): YearMonth {
+  const index = Number(month.slice(0, 4)) * 12 + Number(month.slice(5)) - 1 + count
+  return `${Math.floor(index / 12)}-${String((index % 12) + 1).padStart(2, '0')}`
+}
+
+const shortMonth = new Intl.DateTimeFormat('en-GB', { month: 'short', timeZone: 'UTC' })
+const monthName = new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' })
+
+/** "Nov" */
+export const monthShort = (date: IsoDate) => shortMonth.format(toUtc(date))
+
+/** "October 2026" */
+export const monthLabel = (month: YearMonth) => monthName.format(toUtc(`${month}-01`))
