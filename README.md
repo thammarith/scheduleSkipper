@@ -18,6 +18,8 @@ The page loads the sample plan (Mook’s Birthday, 19 Oct – 1 Nov 2026) in “
 
 The organiser's page is at `http://localhost:5173/#/setup`; `?seed=setup` loads a sample plan for it (two weekends and the holiday, two dinner slots, and Sun 25 with its own times). It is there to check the screens against the designs.
 
+The pages link up: Done on the setup page saves the plan and opens the guest page, and Back on the guest page returns to setup. Back on the setup page leaves without saving. Nothing is kept between page loads yet.
+
 On the guest page, a plan without time slots shows the free-form page above, limited to the possible days. A plan with slots shows each possible day with its slots instead; guests tap a slot to cycle busy, free and “can be free”, and can't enter other times.
 
 Other scripts:

@@ -19,11 +19,12 @@ const LABEL: Record<SlotState, string> = { busy: 'Busy', free: 'Free', ifNeeded:
 interface SlotAvailabilityEditorProps {
   plan: Plan
   initial: Availability
+  onBack: () => void
   onSave: (availability: Availability) => Promise<void>
 }
 
 /** "When are you free?" for a plan whose organiser offers set time slots: guests tap a slot on each possible day. */
-export function SlotAvailabilityEditor({ plan, initial, onSave }: SlotAvailabilityEditorProps) {
+export function SlotAvailabilityEditor({ plan, initial, onBack, onSave }: SlotAvailabilityEditorProps) {
   // Answers are kept as free and "can be free" times; anything not answered counts as busy.
   const [availability, setAvailability] = useState(() =>
     initial.mode === 'free' ? initial : normalise(flip(initial, plan), plan),
@@ -37,7 +38,7 @@ export function SlotAvailabilityEditor({ plan, initial, onSave }: SlotAvailabili
 
   return (
     <main className="page">
-      <PageNav onDone={save} />
+      <PageNav onBack={onBack} onDone={save} />
 
       <header className="page-header">
         <p className="footnote semibold secondary caps">

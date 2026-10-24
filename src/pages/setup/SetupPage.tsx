@@ -10,7 +10,6 @@ import { Disclosure } from '../../ui/Disclosure'
 import { Icon } from '../../ui/Icon'
 import { PageNav } from '../../ui/PageNav'
 import { Sheet } from '../../ui/Sheet'
-import { useToast } from '../../ui/Toast'
 import { CalendarNotes, DayCalendar } from '../availability/DayCalendar'
 import { rangeIcon } from '../availability/tone'
 import '../availability/sheets.css'
@@ -21,10 +20,13 @@ import './SetupPage.css'
 interface SetupPageProps {
   store: AvailabilityStore
   planId: string
+  onBack: () => void
+  /** Called once the plan is saved. */
+  onSaved: () => void
 }
 
 /** The organiser's page: which days are possible, and which time slots guests choose from. */
-export function SetupPage({ store, planId }: SetupPageProps) {
+export function SetupPage({ store, planId, onBack, onSaved }: SetupPageProps) {
   const [plan, setPlan] = useState<Plan>()
   const [error, setError] = useState<string>()
 
@@ -41,7 +43,7 @@ export function SetupPage({ store, planId }: SetupPageProps) {
 
   if (error) return <p className="page-error body secondary">Couldn’t load this plan. {error}</p>
   if (!plan) return null
-  return <SetupEditor initial={plan} onSave={(next) => store.savePlan(next)} />
+  return <SetupEditor initial={plan} onBack={onBack} onSave={(next) => store.savePlan(next).then(onSaved)} />
 }
 
 type SheetState =
@@ -49,13 +51,12 @@ type SheetState =
   | { kind: 'override'; date: IsoDate }
   | { kind: 'pick' }
 
-function SetupEditor({ initial, onSave }: { initial: Plan; onSave: (plan: Plan) => Promise<void> }) {
+function SetupEditor({ initial, onBack, onSave }: { initial: Plan; onBack: () => void; onSave: (plan: Plan) => Promise<void> }) {
   const [plan, setPlan] = useState(initial)
   const [open, setOpen] = useState({ days: true, slots: false })
   // The sheet's content outlives `sheetOpen` so it can animate out; `id` remounts it with a fresh draft.
   const [sheet, setSheet] = useState<SheetState & { id: number }>()
   const [sheetOpen, setSheetOpen] = useState(false)
-  const [toast, showToast] = useToast()
 
   const showSheet = (next: SheetState) => {
     setSheet((current) => ({ ...next, id: (current?.id ?? 0) + 1 }))
@@ -67,11 +68,6 @@ function SetupEditor({ initial, onSave }: { initial: Plan; onSave: (plan: Plan) 
     closeSheet()
   }
 
-  const save = async () => {
-    await onSave(plan)
-    showToast('Plan saved')
-  }
-
   const hasSlots = plan.slots.length > 0
   const overridden = Object.keys(plan.overrides).sort()
   const canOverride = plan.possibleDays.some((date) => !(date in plan.overrides))
@@ -80,7 +76,7 @@ function SetupEditor({ initial, onSave }: { initial: Plan; onSave: (plan: Plan) 
 
   return (
     <main className="page">
-      <PageNav onDone={save} />
+      <PageNav onBack={onBack} onDone={() => onSave(plan)} />
 
       <header className="page-header">
         <p className="footnote semibold secondary caps">Set up your plan</p>
@@ -242,7 +238,6 @@ function SetupEditor({ initial, onSave }: { initial: Plan; onSave: (plan: Plan) 
         )}
       </Sheet>
 
-      {toast}
     </main>
   )
 }

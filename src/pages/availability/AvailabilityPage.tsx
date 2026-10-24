@@ -22,10 +22,11 @@ import './sheets.css'
 interface AvailabilityPageProps {
   store: AvailabilityStore
   planId: string
+  onBack: () => void
 }
 
 /** "When are you free?": one person marks when they can make it within a plan. */
-export function AvailabilityPage({ store, planId }: AvailabilityPageProps) {
+export function AvailabilityPage({ store, planId, onBack }: AvailabilityPageProps) {
   const [loaded, setLoaded] = useState<{ plan: Plan; availability: Availability }>()
   const [error, setError] = useState<string>()
 
@@ -46,6 +47,7 @@ export function AvailabilityPage({ store, planId }: AvailabilityPageProps) {
     <Editor
       plan={loaded.plan}
       initial={loaded.availability}
+      onBack={onBack}
       onSave={(availability) => store.saveAvailability(planId, availability)}
     />
   )
@@ -66,10 +68,11 @@ interface MenuState {
 interface AvailabilityEditorProps {
   plan: Plan
   initial: Availability
+  onBack: () => void
   onSave: (availability: Availability) => Promise<void>
 }
 
-function AvailabilityEditor({ plan, initial, onSave }: AvailabilityEditorProps) {
+function AvailabilityEditor({ plan, initial, onBack, onSave }: AvailabilityEditorProps) {
   const [availability, setAvailability] = useState(initial)
   const [expanded, setExpanded] = useState<Record<ListKey, boolean>>({ primary: true, ifNeeded: false })
   // The sheet's content outlives `sheetOpen` so it can animate out; `id` remounts it with a fresh draft.
@@ -118,7 +121,7 @@ function AvailabilityEditor({ plan, initial, onSave }: AvailabilityEditorProps) 
 
   return (
     <main className="page">
-      <PageNav onDone={save} />
+      <PageNav onBack={onBack} onDone={save} />
 
       <header className="page-header">
         <p className="footnote semibold secondary caps">
